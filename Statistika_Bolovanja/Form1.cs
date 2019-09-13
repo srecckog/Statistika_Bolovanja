@@ -11,6 +11,8 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Net;
 using System.Net.Sockets;
+using System.Globalization;
+
 //using Microsoft.Office.Interop.Word;
 
 
@@ -19,6 +21,7 @@ namespace Statistika_Bolovanja
     public partial class Form1 : Form
     {
         public string connectionString = @"Data Source=192.168.0.3;Initial Catalog = RFIND ; User ID=sa ; Password=AdminFX9.";
+        public string connectionStringPSR = @"Data Source=192.168.0.3;Initial Catalog = FXSAP ; User ID=sa ; Password=AdminFX9.";
         public string connectionStringFeroapp = @"Data Source=192.168.0.3;Initial Catalog = Feroapp ; User ID=sa ; Password=AdminFX9.";
         public string connectionStringpa = @"Data Source=192.168.0.6;Initial Catalog =PantheonFxAt; User ID=sa ; Password=AdminFX9.";
         public string connectionStringpb = @"Data Source=192.168.0.6;Initial Catalog =PantheonTKB; User ID=sa ; Password=AdminFX9.";
@@ -26,7 +29,7 @@ namespace Statistika_Bolovanja
         public int prikazinormu = 0, prikazibolovanje = 0, prikaziizostanak = 0, prikazigodisnji = 0;
         public int idradnika1;
         public int g1, m1, prikaz1;
-        public string danx;
+        public string danx,poduzece1;
 
         public class radnici
         {
@@ -105,6 +108,21 @@ namespace Statistika_Bolovanja
         
         public int ssindex1;
 
+
+        // Create and initialze the MediaCapture object.
+        //public async void InitMediaCapture()
+        //{
+        //    _mediaCapture = null;
+        //    _mediaCapture = new Windows.Media.Capture.MediaCapture();
+
+        //    // Set the MediaCapture to a variable in App.xaml.cs to handle suspension.
+        //    (App.Current as App).MediaCapture = _mediaCapture;
+
+        //    await _mediaCapture.InitializeAsync(_captureInitSettings);
+
+        //    CreateProfile();
+        //}
+
         public Form1()
         {
             InitializeComponent();
@@ -141,7 +159,7 @@ namespace Statistika_Bolovanja
                 cn.Open();
                 //SqlCommand sqlCommand = new SqlCommand("SELECT [Radnik id] as id,[ime x] as ime,[prezime x] as prezime,rfid,rfid2,rfidhex,lokacija,mt FROM radniciAT0 union all select [Radnik id] as id,[ime x] as ime,[prezime x] as prezime,rfid,rfid2,rfidhex,lokacija,mt from radniciTB0 where mt in ( 700,702,703,710,716) order by prezime", cn);
                 // SqlCommand sqlCommand = new SqlCommand("SELECT id, ime, prezime,rfid,rfid2,rfidhex,lokacija,mt FROM  radnici_ where mt in ( 700,702,703,710,716)  order by prezime", cn);
-                SqlCommand sqlCommand = new SqlCommand("SELECT r.id, r.ime, prezime,rfid,rfid2,rfidhex,lokacija,mt,poduzece FROM  radnici_ r left join mjestotroska m on r.mt = m.id where r.neradi=0 order by prezime", cn);
+                SqlCommand sqlCommand = new SqlCommand("SELECT r.id, r.ime, prezime,rfid,rfid2,rfidhex,lokacija,mt,poduzece FROM  radnici_ r left join mjestotroska m on r.mt = m.id where  r.neradi=0 or datediff(month,getdate(),datumprestanka)>=-1 order by prezime", cn);
 
                 if (idloged == "8")   // ako je grupa 8 ili tehn. direktor, može vidjeti sve, može printati
                 {
@@ -691,6 +709,9 @@ namespace Statistika_Bolovanja
                         cnn3.Open();
                         vjes1 = vjes1.Substring(1, vjes1.Length-1).Trim();
                         int l1 = vjes1.Length;
+                        if (l1 > 254)
+                            vjes1 = vjes1.Substring(0, 254);
+
                         string sql3 = "update kompetencije set vještine ='" + vjes1 + "' where id=" + idradnik1 + " and rtrim(ltrim(poduzece))='" + firma1+"'";
                         SqlCommand cmd3 = new SqlCommand(sql3, cnn3);
                         SqlDataReader rdr3 = null;
@@ -870,7 +891,10 @@ namespace Statistika_Bolovanja
 
                                 satnica1 = satnica1.Replace(",", ".");
                                 satnica2 = satnica2.Replace(",", ".");
-
+                                if (satnica1.TrimEnd()=="")
+                                {
+                                    satnica1 = "0";
+                                }
                                 sql1 = "insert into satnica (firma,radnikid,ime,godina,mjesec,satnicastara,satnica) values( " + firma + "," + radnikid.ToString() + ",'" + ime1 + "'," + godina2 + "," + mjesec2 + "," + satnica2 + "," + satnica1 + ")";
 
                                 using (SqlConnection cn = new SqlConnection(connectionString))
@@ -880,7 +904,7 @@ namespace Statistika_Bolovanja
                                     SqlDataReader reader = sqlCommand.ExecuteReader();
                                     cn.Close();
 
-                                    if (radnikid == "5")
+                                    if (radnikid == "1522")
                                     {
                                         radnikid = radnikid;
                                     }
@@ -929,13 +953,30 @@ namespace Statistika_Bolovanja
                             {
                                 if (radnikid != rdr["radnikid"].ToString())
                                 {
-                                    if (radnikid == "1037")
+                                    if (radnikid == "1522")
                                     {
 
                                         radnikid = radnikid;
 
                                     }
                                     joss2 = false;
+                                    satnica1 = satnica1.Replace(",", ".");
+                                    satnica2 = satnica2.Replace(",", ".");
+                                    if (satnica1.TrimEnd() == "")
+                                    {
+                                        satnica1 = "0";
+                                    }
+                                    if (satnica2.TrimEnd() == "")
+                                    {
+                                        satnica2 = "0";
+                                    }
+                                    if (firma == "1")
+                                        sql1 = "update kompetencije  set satnicabruto= " + satnica1 + " ,satnicastara= " + satnica2 + " , satnicaNovaod =' " + godina2 + " - " + mjesec2 + "' where id=" + radnikid.ToString() + " and poduzece='FX'";
+                                    else
+                                        sql1 = "update kompetencije  set satnicabruto=" + satnica1 + " ,satnicastara= " + satnica2 + " , satnicaNovaod =' " + godina2 + " - " + mjesec2 + "' where id=" + radnikid.ToString() + " and poduzece='Tokabu'";
+
+
+
                                     if (insert1 == 0)
                                     {
 
@@ -1250,7 +1291,7 @@ namespace Statistika_Bolovanja
                 int ssindex = int.Parse(combo_listadjelatnika.SelectedValue.ToString());
                 ssindex1 = ssindex;
 
-                string poduzece1 = radnicii.Find(item => item.id == ssindex.ToString()).poduzece;
+                poduzece1 = radnicii.Find(item => item.id == ssindex.ToString()).poduzece;
                 string poduzece1s = "";
                 if (poduzece1 == "1")
                 {
@@ -1360,13 +1401,21 @@ namespace Statistika_Bolovanja
                         row.Cells[5].Value = norm.ToString();
 
 
-                        if ((kol) >= (norm))
+                        if ( (kol - norm)<1 && ( kol-norm)>=0 )
                         {
                             //                            row.Cells[6].Style.BackColor = System.Drawing.Color.LawnGreen;
                             row.Cells[5].Style.BackColor = System.Drawing.Color.LawnGreen;
                             row.Cells[4].Style.BackColor = System.Drawing.Color.LawnGreen;
                         }
-						if ((kol) < (norm*0.9))
+                        if ((kol - norm) >1)
+                        {
+                            //                            row.Cells[6].Style.BackColor = System.Drawing.Color.LawnGreen;
+                            row.Cells[6].Style.BackColor = System.Drawing.Color.Chocolate;
+                            row.Cells[5].Style.BackColor = System.Drawing.Color.Chocolate;
+                            row.Cells[4].Style.BackColor = System.Drawing.Color.Chocolate;
+                        }
+
+                        if ((kol) < (norm*0.9))
                         {
                             //                            row.Cells[6].Style.BackColor = System.Drawing.Color.LawnGreen;
                             row.Cells[5].Style.BackColor = System.Drawing.Color.Red;
@@ -1559,6 +1608,12 @@ namespace Statistika_Bolovanja
                 
                 while (reader1.Read())
                 {
+
+                    if (reader1["id_radnika"]==DBNull.Value)
+                    {
+                        MessageBox.Show("Djelatnik nije u bazi radnici !", "Poruka");
+                        continue;
+                    }
                     idradnika1 = (int.Parse)(reader1["id_radnika"].ToString());
                 }
 
@@ -1600,6 +1655,8 @@ namespace Statistika_Bolovanja
                     if (rbr==1)
                     {
                         datumz = reader11["addate"].ToString();
+                        string[] dz = datumz.Split(' ');
+                        datumz = dz[0];
                         datumo = reader11["addateend"].ToString();
                         string[] datz1p = datumz.Split('.');
                         datz1 = new DateTime((int.Parse)(datz1p[2]), (int.Parse)(datz1p[1]), (int.Parse)(datz1p[0]));
@@ -1680,7 +1737,7 @@ namespace Statistika_Bolovanja
                 tb_vjestina.Text = rdr["vještine"].ToString();  // vjestina staro
                 //label27.Text = rdr["vjestina"].ToString();
                 label28.Text = rdr["mjesto_troska"].ToString();
-                label113.Text = rdr["Godisnji_ostalo"].ToString();
+                label113.Text = rdr["Godisnji_ostalo"].ToString()+" na dan 31.12.2018";
                 if (rdr["Hala"].ToString().Trim().Length > 0)
                 {
                     label29.Text = "Hala" + rdr["Hala"].ToString() + " - " + rdr["radnomjesto"].ToString();
@@ -1899,6 +1956,7 @@ namespace Statistika_Bolovanja
         #region ocisti, isprazni labals
         private void OcistiPanele()
         {
+            pnl_godisnjiodmor2.Visible = false;
             pnl_odredeno.Visible = false;
             pnl_norme.Visible = false;
             dgv_norme.Visible = false;
@@ -2025,6 +2083,8 @@ namespace Statistika_Bolovanja
 
             int row1 = e.RowIndex;
             int col1 = e.ColumnIndex;
+            string p1 = poduzece1;
+
 
             if (col1 == 0)
             {
@@ -2037,7 +2097,7 @@ namespace Statistika_Bolovanja
                 //int d1 = col1 - 7;
                 //DateTime dat1 = new DateTime(g1, m1, d1);
 
-                string sql11 = "select n.DanNapomene,n.napomena from fxsap.dbo.plansatirada p left join fxsap.dbo.plansatiradanapomene n on p.psrid=n.psrid where year(n.dannapomene)=" + g1.ToString() + " and month(n.dannapomene)=" + m1.ToString() + " and radnikid=" + ssindex1.ToString();
+                string sql11 = "select n.DanNapomene,n.napomena from fxsap.dbo.plansatirada p left join fxsap.dbo.plansatiradanapomene n on p.psrid=n.psrid where year(n.dannapomene)=" + g1.ToString() + " and month(n.dannapomene)=" + m1.ToString() + " and firma="+poduzece1+" and radnikid=" + ssindex1.ToString();
 
 
                 SqlConnection connection = new SqlConnection(connectionString);
@@ -2078,11 +2138,11 @@ namespace Statistika_Bolovanja
                 //int d1 = col1 - 7;
                 //DateTime dat1 = new DateTime(g1, m1, d1);
 
-                string sql11 = "select "+danx +" from fxsap.dbo.plansatirada p where godina=" + g1.ToString() + " and mjesec=" + m1.ToString() + " and radnikid=" + ssindex1.ToString();
+                string sql11 = "select "+danx +" from fxsap.dbo.plansatirada p where godina=" + g1.ToString() + " and mjesec=" + m1.ToString() + " and firma="+poduzece1+" and radnikid=" + ssindex1.ToString();
                 using (SqlConnection cn = new SqlConnection(connectionString))
                 {
                     cn.Open();                    
-                    string sql1 = "select " + danx + " from fxsap.dbo.plansatirada p where godina=" + g1.ToString() + " and mjesec=" + m1.ToString() + " and radnikid=" + ssindex1.ToString();
+                    string sql1 = "select " + danx + " from fxsap.dbo.plansatirada p where godina=" + g1.ToString() + " and mjesec=" + m1.ToString() + " and firma=" + poduzece1 + " and radnikid=" + ssindex1.ToString();
 
                     SqlCommand sqlCommand = new SqlCommand(sql1, cn);
                     SqlDataReader reader = sqlCommand.ExecuteReader();
@@ -2157,20 +2217,38 @@ namespace Statistika_Bolovanja
 
         private void vjestineToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            string sql11 = "select * from vjestine";
             if (idadm != "8")
             {
-                return;
+                if (idloged == "5")   // kaljenje
+                {
+                    //return;
+                    sql11 = "select * from vjestine where grupa='T'";
+                }
+                else if ( idloged=="2")  // alatnica - zona
+                {
+                    sql11 = "select * from vjestine where grupa='A'";
+                }
+                else if (idloged == "1")   // Tokarenje
+                {
+                    sql11 = "select * from vjestine where grupa='D'";
+                }
+
             }
-            
-            pnl_vjestine_spajanje.Visible = false;
-            panel1.Visible = false;
+            else
+            {
+
+            }
+
             pnl_vjestine.Visible = true;
+            pnl_vjestine_spajanje.Visible = false;
+            panel1.Visible = false;            
             panel1.Visible = false;
             pl_zbirni.Visible = false;
             pl_psr.Visible = false;
             dgv_psr.Visible = false;
 
-            string sql11 = "select * from vjestine";
+            
 
             SqlConnection connection = new SqlConnection(connectionString);
             SqlDataAdapter dataadapter = new SqlDataAdapter(sql11, connection);
@@ -2898,7 +2976,7 @@ namespace Statistika_Bolovanja
                     lista_skolovanja.Add(sk1);
 
                     // traži u listi školovanja
-                    string sql11 = "select * from skolovanje where idradnika=" + idradnika1+ " order by izmjenaod desc";
+                    string sql11 = "select * from skolovanje where idradnika=" + idradnika1+ " and gotovo=0 order by izmjenaod desc";
                     SqlConnection cn2 = new SqlConnection(connectionString);
                     cn2.Open();
                     SqlCommand sqlcommand1 = new SqlCommand(sql11, cn2);
@@ -3382,6 +3460,7 @@ namespace Statistika_Bolovanja
                         sql1 = "";
                         idradnika1 = reader0["ID"].ToString();
                         string vjestina2 = reader0["AR"].ToString();
+                        string vjestina3 = reader0["JLG"].ToString();
                         string vjestina11 = reader0["IR"].ToString();
                         string vjestinaTurm = reader0["Turm"].ToString();
                         string vjestina15 = reader0["VC_HURCO"].ToString();
@@ -3496,6 +3575,12 @@ namespace Statistika_Bolovanja
                             idvjestina = "23";
                             sql1 = sql1 + ";insert into RadniciVjestine (idradnika,idvjestine,firma) values (" + idradnika1 + "," + idvjestina + "," + firma + ")";
                         }
+                        if ((vjestina3 == "1"))   //  JLG
+                        {
+                            idvjestina = "3";
+                            sql1 = sql1 + ";insert into RadniciVjestine (idradnika,idvjestine,firma) values (" + idradnika1 + "," + idvjestina + "," + firma + ")";
+                        }
+
                         if ((vjestina24 == "1"))   // IWK
                         {
                             idvjestina = "24";
@@ -4386,7 +4471,7 @@ namespace Statistika_Bolovanja
             string firma = "1";    //?????
             string idvjestine;
             int i1 = combox_skolovanja.SelectedIndex;
-            if (!cbs_novo.Checked)
+            if ((!cbs_novo.Checked) && ( idloged=="5"))   // ????????????????????
             {
                 if (i1<=0)
                    {
@@ -4507,6 +4592,7 @@ namespace Statistika_Bolovanja
                         sql1 = "";
                         idradnika1 = reader0["ID"].ToString();
                         string vjestina2 = reader0["AR"].ToString();
+                        string vjestina3 = reader0["JLG"].ToString();
                         string vjestina11 = reader0["IR"].ToString();
                         string vjestinaTurm = reader0["Turm"].ToString();
                         string vjestina15 = reader0["VC_HURCO"].ToString();
@@ -4697,6 +4783,13 @@ namespace Statistika_Bolovanja
                             sql1 = sql1 + ";insert into RadniciVjestine (idradnika,idvjestine,firma) values (" + idradnika1 + "," + idvjestina + "," + firma + ")";
                         }
 
+                        if ((vjestina3 == "1"))   //  JLG
+                        {
+                            idvjestina = "3";
+                            sql1 = sql1 + ";insert into RadniciVjestine (idradnika,idvjestine,firma) values (" + idradnika1 + "," + idvjestina + "," + firma + ")";
+                        }
+
+
                         if (sql1.Length > 0)
                         {
                             using (SqlConnection cn1 = new SqlConnection(connectionString))
@@ -4780,12 +4873,15 @@ namespace Statistika_Bolovanja
                 while ( rdr3.Read() )
                 {
                     imaskolovanje = 1;
-                    idskolovanje1 = (int.Parse)(rdr3["idskolovanja"].ToString());
+                   // idskolovanje1 = (int.Parse)(rdr3["idskolovanja"].ToString());
                 }
+                //imaskolovanje = 0;
                 var o10 = combox_skolovanja.SelectedItem;
                 skolovanje1 sk10 = (skolovanje1)(o10);
 
                 idskolovanje1 = (int.Parse)(sk10.idskolovanje.ToString());  // izabrani id skolovanja, za update
+
+
                 //int i10 = combox_skolovanja.SelectedIndex;                
                 //var 
                 //idskolovanje1 = (int.Parse)(combox_skolovanja.SelectedValue.ToString());
@@ -4795,10 +4891,25 @@ namespace Statistika_Bolovanja
 
                 if (cbs_novo.Checked)  // ako je novo odredi novi id skolovanja
                 {
+
+
                     using (SqlConnection cn = new SqlConnection(connectionString))
                     {
                         cn.Open();
-                        string sql1 = "select max(idskolovanja) ids from radnicivjestines";
+                        string sql1 = "";
+
+                        if (idloged=="5")
+                        {
+                            sql1 = "select max(idskolovanja) ids from radnicivjestines";
+                            sql1 = "select max(idskolovanja) ids from skolovanje";
+                        }
+                        else
+                        {
+                            sql1 = "select max(idskolovanja) ids from skolovanje";
+                        }
+                             
+
+
                         SqlCommand sqlCommand = new SqlCommand(sql1, cn);
                         SqlDataReader reader = sqlCommand.ExecuteReader();
                         reader.Read();
@@ -4817,12 +4928,31 @@ namespace Statistika_Bolovanja
 
                 //if ( (cbs_izmjena.Checked) && ( ( imaskolovanje==1)&&((!cbs_novo.Checked)) ) )        // update
 
+                //imaskolovanje = 0;
+
             if (((imaskolovanje == 1) && ((!cbs_novo.Checked))))        // update
             {
+                    if (idskolovanje1 <= 0)
+                    {
+                       MessageBox.Show("Odaberite školovanje !");
+                       return;
+                    }
+
                     using (SqlConnection cn = new SqlConnection(connectionString))
                     {
                         cn.Open();
-                        string sql1 = "delete from RadniciVjestineS where idskolovanja=" + idskolovanje1.ToString() + " and idradnika="+idradnika1;
+                        string sql1 = "";
+                        if (idloged=="5")
+                        {
+                            sql1 = "delete from RadniciVjestineS where idskolovanja=" + idskolovanje1.ToString() + " and idradnika=" + idradnika1;
+                        }
+                        else
+                        {
+                            //sql1 = "delete from RadniciVjestine where idskolovanja=" + idskolovanje1.ToString() + " and idradnika=" + idradnika1;
+                            sql1 = "select * from RadniciVjestine" ;
+                        }
+
+                        
                         SqlCommand sqlCommand = new SqlCommand(sql1, cn);
                         SqlDataReader reader = sqlCommand.ExecuteReader();
                         cn.Close();
@@ -4831,12 +4961,16 @@ namespace Statistika_Bolovanja
 
                     sql3 = "update skolovanje set oddatuma='"+d1+"',dodatuma='"+d2+"',projekt='"+projekt1+"',hala='"+tb_hala.Text+"',linija='"+linija1+"',mentor='"+mentor2+"',napomena='"+napomena2+"',gotovo="+gotovo.ToString()+",poduzece='"+poduzece2 + "',izmjenaod=getdate() where idradnika=" + idradnika1+ " and idskolovanja="+idskolovanje1.ToString() ;
 
-                 }
-                 cnn3.Open();
-                 cmd3 = new SqlCommand(sql3, cnn3);
-                 rdr3 = null;
-                 rdr3 = cmd3.ExecuteReader();
-                 cnn3.Close();
+            }
+
+                if (sql3 != "")
+                {
+                    cnn3.Open();
+                    cmd3 = new SqlCommand(sql3, cnn3);
+                    rdr3 = null;
+                    rdr3 = cmd3.ExecuteReader();
+                    cnn3.Close();
+                }
 
             }
 
@@ -4988,10 +5122,14 @@ namespace Statistika_Bolovanja
                     }
                     cn.Close();
                 }
-                cbxl_vjestine.Items.AddRange(cboxlista.ToArray());
-                cbxlista_skolovanje.Items.AddRange(cboxlistaskol.ToArray());
-                cbxlista_skolovanje.Visible = true;
-                cbx_skolo_marked.Visible = true;
+
+                if (gv == "T")
+                {
+                    cbxl_vjestine.Items.AddRange(cboxlista.ToArray());
+                    cbxlista_skolovanje.Items.AddRange(cboxlistaskol.ToArray());
+                    cbxlista_skolovanje.Visible = true;
+                    cbx_skolo_marked.Visible = true;
+                }
 
 
             }
@@ -5056,6 +5194,7 @@ namespace Statistika_Bolovanja
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 25) pakiranje_iwk," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 38) membrane," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 26) skf," +
+                            "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 3) JLG," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 27) pakiranje_skf," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 28) glodanje_skf," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 29) vise_vretenasta," +
@@ -5335,6 +5474,7 @@ namespace Statistika_Bolovanja
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 25) pakiranje_iwk," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 38) membrane," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 26) skf," +
+                            "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 3) JLG," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 27) pakiranje_skf," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 28) glodanje_skf," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 29) vise_vretenasta," +
@@ -5445,6 +5585,7 @@ namespace Statistika_Bolovanja
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 25) pakiranje_iwk," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 38) membrane," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 26) skf," +
+                            "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 3) JLG," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 27) pakiranje_skf," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 28) glodanje_skf," +
                             "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 29) vise_vretenasta," +
@@ -5558,6 +5699,7 @@ namespace Statistika_Bolovanja
                         "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 25) pakiranje_iwk," +
                         "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 38) membrane," +
                         "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 26) skf," +
+                        "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 3) JLG," +
                         "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 27) pakiranje_skf," +
                         "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 28) glodanje_skf," +
                         "(select count(*) from radnicivjestine v where v.idradnika = k.id and idvjestine = 29) vise_vretenasta," +
@@ -5639,6 +5781,7 @@ namespace Statistika_Bolovanja
             connection.Close();
 
             // dgv_odred.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.Fill);
+            
             dgv_vjest_history.DataSource = ds;
             dgv_vjest_history.DataMember = "event";
             dgv_vjest_history.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
@@ -5795,6 +5938,9 @@ namespace Statistika_Bolovanja
                 if (projekt1 == "SKF")
                     sql1 = "update projectmtz set available=" + broj.ToString() + " where project like '%SKF%';";
 
+                if (projekt1 == "JLG")
+                    sql1 = "update projectmtz set available=" + broj.ToString() + " where project like '%JLG%';";
+
                 if (projekt1 == "IWK")
                     sql1 = "update projectmtz set available=" + broj.ToString() + " where project like '%KYSUCE%';";
 
@@ -5819,6 +5965,9 @@ namespace Statistika_Bolovanja
 
                 if (projekt1 == "Š_SKF")
                     sql1 = sql1 + "update projectmtz set education=" + broj.ToString() + " where project like '%SKF%';";
+
+                if (projekt1 == "Š_JLG")
+                    sql1 = sql1 + "update projectmtz set education=" + broj.ToString() + " where project like '%JLG%';";
 
                 if (projekt1 == "Š_IWK")
                     sql1 = sql1 + "update projectmtz set education=" + broj.ToString() + " where project like '%KYSUCE%';";
@@ -5966,7 +6115,22 @@ namespace Statistika_Bolovanja
             broj1 = (int.Parse)(sqlCommand.ExecuteScalar().ToString());
             reader = sqlCommand.ExecuteReader();
 
-            sql1 = sql1 = "update projectmtz set dodatneoperacije=" + broj1.ToString() + " where project like '%SKF%';";
+            sql1 = "select count(*) broj from (select distinct id from( select projekt, count(*) broj, k.id, v.Naziv " +
+                "from kompetencije k " +
+                "left join RadniciVjestine rv on rv.idradnika = k.id " +
+                "left join vjestine v on v.id = rv.idvjestine " +
+                "left join radnici_ r on r.id = k.id  where r.neradi = 0 and k.mjesto_troska = 'Tokarenje'  and k.projekt = 'JLG' AND   " +
+                "k.id in ( select idradnika from radnicivjestine where idvjestine in (28,27,29,31,30)) group by projekt,k.id,v.naziv )x1)x2";
+
+            //"and k.id not in ( select idradnika from radnicivjestine where idvjestine in (16, 17)) group by projekt,k.id,v.naziv )x1";//
+            cn = new SqlConnection(connectionString);
+            cn.Open();
+            sqlCommand = new SqlCommand(sql1, cn);
+            broj1 = (int.Parse)(sqlCommand.ExecuteScalar().ToString());
+            reader = sqlCommand.ExecuteReader();
+
+            sql1 = sql1 = "update projectmtz set dodatneoperacije=" + broj1.ToString() + " where project like '%JLG%';";
+
             using (SqlConnection cn2 = new SqlConnection(connectionString))
             {
                 cn2.Open();
@@ -6286,33 +6450,30 @@ namespace Statistika_Bolovanja
             //int firmaid = comb_poduzece.SelectedIndex;
             //string mtid = combo_odred.SelectedValue.ToString();
             pnl_naodlasku.Visible = true;
-            DateTime dat1 = datep_od_ov.Value;
-            DateTime dat2 = datp_do_odr.Value;
-
-            string dat10 = dat1.Year.ToString() + '-' + dat1.Month.ToString() + '-' + dat1.Day.ToString();
-            string dat20 = dat2.Year.ToString() + '-' + dat2.Month.ToString() + '-' + dat2.Day.ToString();
-
-            string sql1 = "select k.id,k.prezimeime,k.funkcija,k.projekt,k.hala,k.linija,k.mjesto_troska,k.vještine,k.školovanje_posto,k.radnomjesto,k.datumzaposlenja,k.istek_ugovora,k.staz,j.danodlaska,k.godisnji_ostalo from kompetencije k left join ( select * from fxsap.dbo.plansatirada where danodlaska != '' and danodlaska<(dateadd(day,30,getdate())) and danodlaska> (dateadd(day, -30, getdate()))  and danodlaska is not NULL" +
-                          ") j on j.radnikid = k.id where projekt not in ('xNERADI', 'xNa odlasku') and j.danodlaska is not null order by PrezimeIme desc ";
+            btn_godisnji.Visible = false;
+            btn_odlasci.Visible = true;
+            label130.Text = "Pregld djelatnika koji su otišli u zadanom periodu";
             
-            string connecStrin = connectionString;
-
-            //if (firmaid == 1)
+            using (SqlConnection cnn1 = new SqlConnection(connectionString))
             {
-            //    connecStrin = connectionStringpb;
+
+                var dataSource = new List<mjesto_troska>();
+
+                dataSource.Add(new mjesto_troska() { naziv = " - ", id = "0" });
+
+                foreach (var mt1 in lista_mt)
+                {
+                    dataSource.Add(new mjesto_troska() { naziv = mt1.naziv, id = mt1.id });
+                }
+
+                combo_mt.MaxDropDownItems = 60;
+                this.combo_mt.DataSource = dataSource;
+                this.combo_mt.DisplayMember = "Naziv";
+                this.combo_mt.ValueMember = "id";
             }
 
-            SqlConnection connection = new SqlConnection(connecStrin);
-            SqlDataAdapter dataadapter = new SqlDataAdapter(sql1, connection);
-            DataSet ds = new DataSet();
-            connection.Open();
-            dataadapter.Fill(ds, "event");
-            connection.Close();
 
-            // dgv_odred.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.Fill);
-            dgv_naodlasku.DataSource = ds;
-            dgv_naodlasku.DataMember = "event";
-            dgv_naodlasku.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+            
         }
 
         private void textBox5_TextChanged(object sender, EventArgs e)
@@ -6333,13 +6494,13 @@ namespace Statistika_Bolovanja
             string sql1 = "";
             if (idloged == "8")
                 {
-                sql1 = "select cast(acregno as int ) as Id,acname Ime,acsurname Prezime,j.acCostDrv Mjesto_troška,j.acDept Lokacija,d.acnumber RFID,j.acjob Radno_mjesto,'' Radni_staz,j.adDate DatumZaposlenja,'' sifra_rm,p.acstreet Ulica,acpost Pošta,'' vrijeme,accity Grad,j.acFieldSA Vrsta_isplate, adDateExit Datum_odlaska from thr_prsn p left join thr_prsnjob j on p.acworker = j.acworker left join thr_prsnadddoc d on d.acWorker = p.acworker and d.actype = 8 where d.actype=8 and j.addateend is null " +
+                sql1 = "select cast(acregno as int ) as Id,acname Ime,acsurname Prezime,j.acCostDrv Mjesto_troška,j.acDept Lokacija,d.acnumber RFID,j.acjob Radno_mjesto,'' Radni_staz,j.adDate DatumZaposlenja,'' sifra_rm,p.acstreet Ulica,acpost Pošta,'' vrijeme,accity Grad,j.acFieldSA Vrsta_isplate, adDateExit Datum_odlaska from thr_prsn p left join thr_prsnjob j on p.acworker = j.acworker left join thr_prsnadddoc d on d.acWorker = p.acworker and d.actype = 8 where d.actype=8 and p.acactive='T' " +
                 "order by cast(acregno as int) desc ";
             }
             else
             {
                 sql1 = "select cast(acregno as int ) as Id,acname Ime,acsurname Prezime,j.acCostDrv Mjesto_troška,j.acDept Lokacija,d.acnumber RFID,j.acjob Radno_mjesto,'' Radni_staz,j.adDate DatumZaposlenja,'' sifra_rm,p.acstreet Ulica,acpost Pošta,'' vrijeme,accity Grad,j.acFieldSA Vrsta_isplate, adDateExit Datum_odlaska from thr_prsn p left join thr_prsnjob j on p.acworker = j.acworker left join thr_prsnadddoc d on d.acWorker = p.acworker and d.actype = 8 " +
-                "where j.addateend is null and d.actype=8 and addateenter>=dateadd(d,-3,getdate()) order by cast(acregno as int) desc ";
+                "where p.acactive='T' and d.actype=8 and addateenter>=dateadd(d,-3,getdate()) order by cast(acregno as int) desc ";
             }
             string connecStrin = connectionStringpa;
             if (chbx_Feroimpex.Checked)
@@ -6811,8 +6972,13 @@ namespace Statistika_Bolovanja
             string dat10 = dat1.Year.ToString() + '-' + dat1.Month.ToString() + '-' + dat1.Day.ToString();
             string dat20 = danas.Year.ToString() + '-' + danas.Month.ToString() + '-' + danas.Day.ToString();
 
-            string sql1 = "select id,ime PrezimeIme,DatumZaposlenja,addateend DatumOdlaska,MT,Lokacija,RadnoMjesto,poduzece Poduzeće,acnumber RFID,acactive AktivnaKartica,adtimeins DatumUnosaKartice,adtimechg DatumPromjene from( select acregno id, p.acworker ime, j.adDate datumzaposlenja, j.addateend, j.acCostDrv MT, j.acdept lokacija, j.acjob RadnoMjesto, 'AT' poduzece, d.acactive, d.acnumber, d.adtimeins, d.adtimechg from PantheonFxAt.dbo.thr_prsn p left join .PantheonFxAt.dbo.thr_prsnjob j on p.acworker = j.acworker left join PantheonFxAt.dbo.thr_prsnadddoc d on d.acworker = P.acworker and d.actype = 8 where(j.adDateEnd is null ) and rtrim(p.acregno) not  in ('', '0000') union all " +
-                 " select acregno id, p2.acworker ime, j2.adDate datumzaposlenja, j2.addateend, j2.acCostDrv mt, j2.acdept lokacija, j2.acjob RadnoMjesto, 'TKB' poduzece, d.acactive, d.acnumber, d.adtimeins, d.adtimechg from PantheonTKB.dbo.thr_prsn p2  left join PantheonTKB.dbo.thr_prsnjob j2 on p2.acworker = j2.acworker left join PantheonTKB.dbo.thr_prsnadddoc d on p2.acworker = d.acworker and d.actype = 8 where(j2.adDateEnd is null ) and rtrim(p2.acregno) not  in ('', '0000') )y1 order by id ";
+//            string sql1 = "select id,ime PrezimeIme,DatumZaposlenja,addateend DatumOdlaska,MT,Lokacija,RadnoMjesto,poduzece Poduzeće,acnumber RFID,acactive AktivnaKartica,adtimeins DatumUnosaKartice,adtimechg DatumPromjene from( select acregno id, p.acworker ime, j.adDate datumzaposlenja, j.addateend, j.acCostDrv MT, j.acdept lokacija, j.acjob RadnoMjesto, 'AT' poduzece, d.acactive, d.acnumber, d.adtimeins, d.adtimechg from PantheonFxAt.dbo.thr_prsn p left join .PantheonFxAt.dbo.thr_prsnjob j on p.acworker = j.acworker left join PantheonFxAt.dbo.thr_prsnadddoc d on d.acworker = P.acworker and d.actype = 8 where(j.adDateEnd is null ) and rtrim(p.acregno) not  in ('', '0000') union all " +
+//                 " select acregno id, p2.acworker ime, j2.adDate datumzaposlenja, j2.addateend, j2.acCostDrv mt, j2.acdept lokacija, j2.acjob RadnoMjesto, 'TKB' poduzece, d.acactive, d.acnumber, d.adtimeins, d.adtimechg from PantheonTKB.dbo.thr_prsn p2  left join PantheonTKB.dbo.thr_prsnjob j2 on p2.acworker = j2.acworker left join PantheonTKB.dbo.thr_prsnadddoc d on p2.acworker = d.acworker and d.actype = 8 where(j2.adDateEnd is null ) and rtrim(p2.acregno) not  in ('', '0000') )y1 order by id ";
+
+            string sql1 = "select id,ime PrezimeIme,DatumZaposlenja,addateend DatumOdlaska,MT,Lokacija,RadnoMjesto,poduzece Poduzeće,acnumber RFID,acactive AktivnaKartica,adtimeins DatumUnosaKartice,adtimechg DatumPromjene from( select p.acactive aktivni,acregno id, p.acworker ime, j.adDate datumzaposlenja, j.addateend, j.acCostDrv MT, j.acdept lokacija, j.acjob RadnoMjesto, 'AT' poduzece, d.acactive, d.acnumber, d.adtimeins, d.adtimechg from PantheonFxAt.dbo.thr_prsn p left join .PantheonFxAt.dbo.thr_prsnjob j on p.acworker = j.acworker left join PantheonFxAt.dbo.thr_prsnadddoc d on d.acworker = P.acworker and d.actype = 8 where rtrim(p.acregno) not  in ('', '0000') union all " +
+                " select p2.acactive aktivni,acregno id, p2.acworker ime, j2.adDate datumzaposlenja, j2.addateend, j2.acCostDrv mt, j2.acdept lokacija, j2.acjob RadnoMjesto, 'TKB' poduzece, d.acactive, d.acnumber, d.adtimeins, d.adtimechg from PantheonTKB.dbo.thr_prsn p2  left join PantheonTKB.dbo.thr_prsnjob j2 on p2.acworker = j2.acworker left join PantheonTKB.dbo.thr_prsnadddoc d on p2.acworker = d.acworker and d.actype = 8 where rtrim(p2.acregno) not  in ('', '0000') )y1 where aktivni='T' order by prezimeime,datumzaposlenja ";
+
+
 
             string connecStrin = connectionStringpa;
 
@@ -6826,6 +6992,80 @@ namespace Statistika_Bolovanja
             DataSet ds = new DataSet();
             connection.Open();
             dataadapter.Fill(ds, "event");
+            int intCount = 0;
+
+            //for (int intCount = 0; intCount < ds.Tables[0].Rows.Count; intCount++)
+            //{
+                //ds.Tables[0].Rows[intCount][4] = "dxasdas";
+                string id1    = ds.Tables[0].Rows[intCount][0].ToString();
+                string ime1   = ds.Tables[0].Rows[intCount][1].ToString();
+                string sdat1  = ds.Tables[0].Rows[intCount][2].ToString()  ;   // datum zaposlanje
+                string[] asdat1= sdat1.Split('.');
+                int br = 1;
+                DateTime datz=DateTime.Now, datp=DateTime.Now;
+                DateTime datz0 = datz,datp1=datp;
+
+            while (intCount < ds.Tables[0].Rows.Count)
+            {
+                id1 = ds.Tables[0].Rows[intCount][0].ToString();
+                br = 0;
+
+                while ((intCount < ds.Tables[0].Rows.Count) && (id1 == ds.Tables[0].Rows[intCount][0].ToString())  )
+                {
+
+                    br++ ;
+                    sdat1 = ds.Tables[0].Rows[intCount][2].ToString();   // datum zaposlenja
+                    if ((sdat1.TrimEnd().Length) > 0)
+                    {
+                        asdat1 = sdat1.Split('.');
+                        datz = new DateTime((int.Parse)(asdat1[2]), (int.Parse)(asdat1[1]), (int.Parse)(asdat1[0]), 0, 0, 0);
+                        if (br == 1)
+                        {
+                            datz0 = datz;
+                        }
+                    }
+                    else
+                    {
+                       
+                        intCount++;
+                        continue;
+                    }
+
+
+                    string sdat2 = ds.Tables[0].Rows[intCount][3].ToString();  // datum prekida
+                    string[] asdat2 = sdat2.Split('.');
+
+                    if ((sdat2.TrimEnd().Length) > 0)
+                    {
+                        //asdat2 = sdat2.Split('.');
+                        datp = new DateTime((int.Parse)(asdat2[2]), (int.Parse)(asdat2[1]), (int.Parse)(asdat2[0]), 0, 0, 0);
+                    }
+
+                    if (br > 1)
+                    {
+
+                        int danq = datz.Subtract(datp1).Days;
+                        if (danq > 2)   // ako je prekid u radnom odnosu veći od dva dana
+                        {
+                            datz0 = datz;
+                            ds.Tables[0].Rows[intCount - 1][2] = datz0;
+                        }
+                        else
+                        {
+                            ds.Tables[0].Rows[intCount][2] = datz0;
+                        }
+
+                    }
+                    datp1 = datp;
+                    intCount++;
+
+                }
+
+            }  
+
+
+
+            //}
             connection.Close();
 
             // dgv_odred.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.Fill);
@@ -7054,8 +7294,8 @@ namespace Statistika_Bolovanja
             string sql1 = "select k.id,k.prezimeime,k.funkcija,k.projekt,k.hala,k.linija,k.mjesto_troska,k.vještine,k.školovanje_posto,k.radnomjesto,k.datumzaposlenja,k.istek_ugovora,k.staz,j.danodlaska,k.godisnji_ostalo from kompetencije k left join ( select * from fxsap.dbo.plansatirada where danodlaska != '' and danodlaska<(dateadd(day,30,getdate())) and danodlaska> (dateadd(day, -30, getdate()))  and danodlaska is not NULL" +
                           ") j on j.radnikid = k.id where projekt not in ('xNERADI', 'xNa odlasku') and j.danodlaska is not null order by PrezimeIme desc ";
 
-            sql1 = "select x1.acregno ID, x1.acworker PrezimeIme, x1.addateenter DatumDolaska, x1.addateend DatumOdlaska, x1.acjob RadnoMjesto, x1.acdept Lokacija, x1.accostdrv MjestoTroška,x1.BrojDanaGodisnjeg, x1.poduzece Poduzeće from( select p.acregno, p.acworker, p.addateenter, j.addateend, j.acjob, j.acdept, j.accostdrv,v.anvacationf1 BrojDanaGodisnjeg, 'FX' poduzece from PantheonFxAt.dbo.thr_prsnjob j left join PantheonFxAt.dbo.thr_prsn p on p.acworker = j.acworker left join PantheonFxAt.dbo.thr_prsnvacation v on p.acworker = v.acworker where j.addateend between '" + dat10 + "' and '" + dat20 + "'  " +
-                  "union all select p.acregno, p.acworker, p.addateenter, j.addateend, j.acjob, j.acdept, j.accostdrv,v.anvacationf1 BrojDanaGodisnjeg, 'TKB' poduzece from PantheonTKB.dbo.thr_prsnjob j  left join PantheonTKB.dbo.thr_prsn p on p.acworker = j.acworker left join PantheonTKB.dbo.thr_prsnvacation v on p.acworker = v.acworker   where j.addateend between '" + dat10 + "' and '" + dat20 + "' ) x1 order by x1.acworker ";
+            sql1 = "select x1.acregno ID, x1.acworker PrezimeIme, x1.addateenter DatumDolaska, x1.addateend DatumOdlaska, x1.acjob RadnoMjesto, x1.acdept Lokacija, x1.accostdrv MjestoTroška,x1.BrojDanaGodisnjeg, x1.poduzece Poduzeće from( select p.acregno, p.acworker, p.addateenter, j.addateend, j.acjob, j.acdept, j.accostdrv,v.anvacationKids BrojDanaGodisnjeg, 'FX' poduzece from PantheonFxAt.dbo.thr_prsnjob j left join PantheonFxAt.dbo.thr_prsn p on p.acworker = j.acworker left join PantheonFxAt.dbo.thr_prsnvacation v on p.acworker = v.acworker where j.addateend between '" + dat10 + "' and '" + dat20 + "'  " +
+                  "union all select p.acregno, p.acworker, p.addateenter, j.addateend, j.acjob, j.acdept, j.accostdrv,v.anvacationKids BrojDanaGodisnjeg, 'TKB' poduzece from PantheonTKB.dbo.thr_prsnjob j  left join PantheonTKB.dbo.thr_prsn p on p.acworker = j.acworker left join PantheonTKB.dbo.thr_prsnvacation v on p.acworker = v.acworker   where j.addateend between '" + dat10 + "' and '" + dat20 + "' ) x1 order by x1.acworker ";
             sql1 = "rfind.dbo.satniceoznake1 '" + dat20 + "'" ;
 
             string connecStrin = connectionString;
@@ -7095,6 +7335,10 @@ namespace Statistika_Bolovanja
 
             DateTime dat1 = new DateTime(y1, m1, 1);
             label130.Text = "Pregled iskorištenih godišnjih odmora";
+            btn_odlasci.Visible = false;
+            btn_godisnji.Visible = true;
+
+
             using (SqlConnection cnn1 = new SqlConnection(connectionString))
             {
 
@@ -7136,7 +7380,12 @@ namespace Statistika_Bolovanja
             string mjesec = txbox_mjesec.Text.ToString();
             DateTime dat1 = new DateTime(y1, m1, 1);
             label130.Text = "Pregled iskorištenih godišnjih odmora";
-            string sql1 = "select ime,sum(brojdanagodisnjeg) BrojDanaGodišnjeg from(select ime, mjesec, (LEN(dani) - LEN(REPLACE(dani, 'g', ''))) brojdanagodisnjeg from( select ime, mjesec, radnikid, (isnull(dan01, '') + isnull(dan02, '') + isnull(dan03, '') + isnull(dan04, '') + isnull(dan05, '') + isnull(dan06, '') + isnull(dan07, '') + isnull(dan08, '') + isnull(dan09, '') + isnull(dan10, '') + isnull(dan11, '') + isnull(dan12, '') + isnull(dan13, '') + isnull(dan14, '') + isnull(dan15, '') + isnull(dan16, '') + isnull(dan17, '') + isnull(dan18, '') + isnull(dan19, '') + isnull(dan20, '') + isnull(dan21, '') + isnull(dan22, '') + isnull(dan23, '') + isnull(dan24, '') + isnull(dan25, '') + isnull(dan26, '') + isnull(dan27, '') + isnull(dan28, '') + isnull(dan29, '') + isnull(dan30, '') + isnull(dan31, '')) dani from fxsap.dbo.plansatirada where mt ="+mt1+" and godina = "+godina1+" and mjesec >= "+mjesec+" and (dan01 like '%g'  or dan02 like '%g'  or dan03 like '%g'  or dan04 like '%g'  or dan05 like '%g'  or dan06 like '%g' or dan07 like '%g'  or dan08 like '%g' or dan09 like '%g'  or dan10 like '%g'  or dan11 like '%g'  or dan12 like '%g'  or dan13 like '%g' or dan14 like '%g'  or dan15 like '%g' or dan16 like '%g' or dan17 like '%g' or dan18 like '%g' or dan19 like '%g' or dan20 like '%g' or dan21 like '%g' or dan22 like '%g' or dan23 like '%g' or dan24 like '%g' or dan25 like '%g' or dan26 like '%g' or dan27 like '%g' or dan28 like '%g'  or dan29 like '%g'  or dan30 like '%g' or dan31 like '%g'  ) " +
+            string sqlmt = "mt =" + mt1+" and ";
+            if (mt1=="0")
+            {
+                sqlmt = " ";
+            }
+            string sql1 = "select ime,sum(brojdanagodisnjeg) BrojDanaGodišnjeg from(select ime, mjesec, (LEN(dani) - LEN(REPLACE(dani, 'g', ''))) brojdanagodisnjeg from( select ime, mjesec, radnikid, (isnull(dan01, '') + isnull(dan02, '') + isnull(dan03, '') + isnull(dan04, '') + isnull(dan05, '') + isnull(dan06, '') + isnull(dan07, '') + isnull(dan08, '') + isnull(dan09, '') + isnull(dan10, '') + isnull(dan11, '') + isnull(dan12, '') + isnull(dan13, '') + isnull(dan14, '') + isnull(dan15, '') + isnull(dan16, '') + isnull(dan17, '') + isnull(dan18, '') + isnull(dan19, '') + isnull(dan20, '') + isnull(dan21, '') + isnull(dan22, '') + isnull(dan23, '') + isnull(dan24, '') + isnull(dan25, '') + isnull(dan26, '') + isnull(dan27, '') + isnull(dan28, '') + isnull(dan29, '') + isnull(dan30, '') + isnull(dan31, '')) dani from fxsap.dbo.plansatirada where "+sqlmt+" godina = "+godina1+" and mjesec >= "+mjesec+" and (dan01 like '%g'  or dan02 like '%g'  or dan03 like '%g'  or dan04 like '%g'  or dan05 like '%g'  or dan06 like '%g' or dan07 like '%g'  or dan08 like '%g' or dan09 like '%g'  or dan10 like '%g'  or dan11 like '%g'  or dan12 like '%g'  or dan13 like '%g' or dan14 like '%g'  or dan15 like '%g' or dan16 like '%g' or dan17 like '%g' or dan18 like '%g' or dan19 like '%g' or dan20 like '%g' or dan21 like '%g' or dan22 like '%g' or dan23 like '%g' or dan24 like '%g' or dan25 like '%g' or dan26 like '%g' or dan27 like '%g' or dan28 like '%g'  or dan29 like '%g'  or dan30 like '%g' or dan31 like '%g'  ) " +
                            " ) x1 ) x2 group by ime order by ime ";
 
             string connecStrin = connectionStringFeroapp;
@@ -7177,7 +7426,7 @@ namespace Statistika_Bolovanja
         }
 
 
-        // click na tablicu sa normama
+        // click na tablicu sa satnicama
         private void Dgv_rfid_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             // klik sa npoamenama radi sadmo u 1. koloni
@@ -7195,6 +7444,8 @@ namespace Statistika_Bolovanja
                 m1 = (int.Parse)(Convert.ToString(selectedRow.Cells["Mjesec"].Value));
                 //int d1 = col1 - 7;
                 //DateTime dat1 = new DateTime(g1, m1, d1);
+                string p1 = poduzece1;
+
 
                 string sql11 = "select n.DanNapomene,n.napomena from fxsap.dbo.plansatirada p left join fxsap.dbo.plansatiradanapomene n on p.psrid=n.psrid where year(n.dannapomene)=" + g1.ToString() + " and month(n.dannapomene)=" + m1.ToString() + " and radnikid=" + ssindex1.ToString();
 
@@ -7459,6 +7710,543 @@ namespace Statistika_Bolovanja
             //}
         }
 
+        private void KompetencijeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void PregledGodišnjihOdmoraToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OcistiPanele();
+            // int z = 0;
+            if (idadm == "8" || idadm == "11")
+            {
+                pnl_pricekajte.Visible = true;   
+            }
+            else
+            {
+                return;
+            }
+
+            pnl_godisnjiodmor2.Visible = true;
+            label151.Visible = true;
+            label151.Text = "Molim pričekajte !";
+
+            Update_GO(DateTime.Now.Year);
+
+            string cnn11 = "";
+            foreach( var item in radnicii)
+            {              
+                string poduz1 = item.poduzece;
+                
+                string ssindex = item.id;
+                int id1 = (int.Parse)(ssindex);
+                if (id1==142)
+                {
+                    id1 = id1;
+                }
+                if (ssindex.Contains("9000"))
+                    {
+                    continue;
+                }
+                if (id1>8000)
+                {
+                    id1 = id1 - 8000;
+                    ssindex = id1.ToString();
+                }
+                string ime1 = item.ime;
+                string prezime1 = item.prezime;
+                string mt1 = item.mt;
+                string lokacija1 = item.lokacija;
+
+                if (poduz1.Contains("1"))
+                {
+                    cnn11 = connectionStringpa;
+                }
+                else
+                {
+                    cnn11 = connectionStringpb;
+                }
+
+                // izračun staža kod prekida radnog odnosa manjeg od dva dana
+
+                SqlConnection cnn111 = new SqlConnection(cnn11);
+                cnn111.Open();
+                string sql11 = "select * from( select p.acworker, addate, adDateEnd,p.acactive from thr_prsn p left join thr_prsnjob j on p.acworker=j.acworker  where p.acregno=" + ssindex + ") x1 order by addate ";
+                SqlCommand cmd11 = new SqlCommand(sql11, cnn111);
+                SqlDataReader reader11 = cmd11.ExecuteReader();
+                int rbr = 1;
+                DateTime dato1 = new DateTime();
+                DateTime dato2 = new DateTime();
+                DateTime datz1 = new DateTime();
+                DateTime datppp = dato1;
+                string datumz = "", datumo = "";
+                string aktivan1 = "";
+
+                while (reader11.Read())
+                {
+
+                    aktivan1 = reader11["acactive"].ToString();
+                    
+                    if (rbr != 0)
+                    {
+                        // datumz = reader11["addate"].ToString();
+                        datumo = reader11["addateend"].ToString();
+                        //string[] datz1p = datumz.Split('.');
+                        //datz1 = new DateTime((int.Parse)(datz1p[2]), (int.Parse)(datz1p[1]), (int.Parse)(datz1p[0]));
+                        string[] datz1p = datumo.Split('.');
+                        if ((datz1p.Length > 1) && (rbr != 0))
+                            dato1 = new DateTime((int.Parse)(datz1p[2]), (int.Parse)(datz1p[1]), (int.Parse)(datz1p[0]));
+                        else
+                            dato1 = DateTime.Now;
+                    }
+
+                    if (rbr == 1)
+                    {
+                        datumz = reader11["addate"].ToString()     ;
+                        string[] dz = datumz.Split(' ')            ;
+                        datumz      = dz[0]                        ;
+                        if (dz.Length<2)                        
+                        {
+
+                        }
+                        datumo = reader11["addateend"].ToString();
+                        string[] datz1p = datumz.Split('.');
+                        datz1 = new DateTime((int.Parse)(datz1p[2]), (int.Parse)(datz1p[1]), (int.Parse)(datz1p[0]));
+                        datz1p = datumo.Split('.');
+                        datppp = dato1;
+                        string[] dato2p = datumo.Split('.');
+                        if (dato2p.Length > 1)
+                            dato2 = new DateTime((int.Parse)(dato2p[2]), (int.Parse)(dato2p[1]), (int.Parse)(dato2p[0]));
+                        else
+                            dato2 = DateTime.Now;
+                    }
+
+                    //DateTime datz = 
+                    if (rbr != 1)
+                    {
+                        string datumz2 = reader11["addate"].ToString();
+                        string datumo2 = reader11["addateend"].ToString();
+                        string[] datz2p = datumz2.Split('.');
+                        string[] dato2p = datumo2.Split('.');
+                        DateTime datz2 = new DateTime((int.Parse)(datz2p[2]), (int.Parse)(datz2p[1]), (int.Parse)(datz2p[0]));
+                        if (dato2p.Length > 1)
+                            dato2 = new DateTime((int.Parse)(dato2p[2]), (int.Parse)(dato2p[1]), (int.Parse)(dato2p[0]));
+                        else
+                            dato2 = DateTime.Now;
+
+                        //datz1p = datumo2.Split('.');
+                        //if (datz1p.Length > 1)
+                        //    dato1 = new DateTime((int.Parse)(datz1p[2]), (int.Parse)(datz1p[1]), (int.Parse)(datz1p[0]));
+
+                        int danq = datz2.Subtract(datppp).Days;
+                        if (danq > 2)   // ako je prekid u radnom odnosu veći od dva dana
+                        {
+                            datumz = datumz2;
+                        }
+                        datumo = datumo2;
+                    }
+                    datppp = dato1;
+                    rbr++;
+                }
+
+                if (aktivan1=="F")
+                {
+                    continue;
+                }
+
+
+                cnn111.Close()                     ;
+                DateTime datumdanas = DateTime.Now ;
+                int mjesecdanas = datumdanas.Month ;
+                int dandanas = datumdanas.Day      ;
+
+                string[] datzp = datumz.Split('.')                                                                      ;
+                DateTime datzaposl = new DateTime((int.Parse)(datzp[2]), (int.Parse)(datzp[1]), (int.Parse)(datzp[0]))  ;
+                int mjeseczap = datzaposl.Month ;
+                int danzap    = datzaposl.Day   ;
+                int bdanag    = 0               ;
+
+                DateTime datt1 = new DateTime(DateTime.Now.Year, 1, 15, 0, 0, 0);
+                
+                if ( dandanas<=15)
+                {
+                    if (danzap <= 15)
+                    { bdanag = (mjesecdanas - mjeseczap) * 2; }
+                    else
+                    { bdanag = (mjesecdanas - mjeseczap-1) * 2; }
+
+                }
+                else
+                {
+                    if (danzap <= 15)
+                    { bdanag = (mjesecdanas - mjeseczap-1) * 2; }
+                    else
+                    { bdanag = (mjesecdanas - mjeseczap) * 2; }                                       
+                }
+                string staz1 = staz(datz1, dato2);
+
+                if (datz1 <= datt1)
+                {
+                    if (dandanas <= 15)
+                        bdanag = (mjesecdanas-1) * 2;
+                    if (dandanas > 15)
+                        bdanag = (mjesecdanas) * 2;
+                }
+
+                using (SqlConnection cnn1 = new SqlConnection(connectionString))
+                {
+                    string datumzap1 = datz1.Year.ToString()+"-"+datz1.Month.ToString() + "-"+datz1.Day.ToString();
+                    string sql1 = "delete from godisnjiodmor2 where id="+ssindex+" and poduzece="+poduz1+" ;insert into godisnjiodmor2 ( id,ime,prezime,radnistaz,datumzaposlenja,poduzece,mt,lokacija,novigo) values(" + ssindex + ",'" + ime1 + "','" + prezime1 + "','"+staz1+"','"+ datumzap1 +"'," + poduz1 + "," + mt1 + "," + lokacija1 + "," + bdanag.ToString() + ")";
+                    cnn1.Open();
+                    SqlCommand cmd1 = new SqlCommand(sql1, cnn1);
+                    SqlDataReader reader1 = cmd1.ExecuteReader();
+                    cnn1.Close();
+                }
+            }
+
+            string connecStrin = connectionStringpa;
+
+            //if (firmaid == 1)
+            {
+                //    connecStrin = connectionStringpb;
+            }
+
+            pnl_pricekajte.Visible = false;
+
+            //Update_GO(DateTime.Now.Year);
+
+            string sql12 = "select O.ID,o.Poduzece,o.managerid Voditelj,o.Prezime,o.Ime,o.DatumZaposlenja,o.RadniStaz,o.MT,o.Lokacija,o.NoviGO,o.StariGO,isnull(k.Korekcija,0) Korekcija,( isnull(g.m07,0)+isnull(g.m08,0)+isnull(g.m09,0)+isnull(g.m10,0)+isnull(g.m11,0)+isnull(g.m12,0)) IskoristioGO,(isnull(k.korekcija,0)+o.novigo-((isnull(g.m07,0)+isnull(g.m08,0)+isnull(g.m09,0)+isnull(g.m10,0)+isnull(g.m11,0)+isnull(g.m12,0)))) PreostaliGO,g.m01,g.m02,g.m03,g.m04,g.m05,g.m06,g.m07,g.m08,g.m09,g.m10,g.m11,g.m12 from godisnjiodmor2 o left join [go] g on g.id=o.id and g.poduzece=o.poduzece left join korekcijago k on k.id=o.id order by prezime";
+            connectionString = @"Data Source=192.168.0.3;Initial Catalog = RFIND ; User ID=sa ; Password=AdminFX9.";
+            SqlConnection connection = new SqlConnection(connectionString);
+            SqlDataAdapter dataadapter = new SqlDataAdapter(sql12, connection);
+            DataSet ds = new DataSet();
+            connection.Open();
+            dataadapter.Fill(ds, "event");
+            connection.Close();
+
+            // dgv_odred.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.Fill);
+            dgv_godisnjiodmori.DataSource = ds;
+            dgv_godisnjiodmori.DataMember = "event";
+            dgv_godisnjiodmori.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+            dgv_godisnjiodmori.Columns["m07"].DefaultCellStyle.BackColor = System.Drawing.Color.Aqua;
+            dgv_godisnjiodmori.Columns["m09"].DefaultCellStyle.BackColor = System.Drawing.Color.Aqua;
+            dgv_godisnjiodmori.Columns["m08"].DefaultCellStyle.BackColor = System.Drawing.Color.Aqua;
+            dgv_godisnjiodmori.Columns["m10"].DefaultCellStyle.BackColor = System.Drawing.Color.Aqua;
+            dgv_godisnjiodmori.Columns["m11"].DefaultCellStyle.BackColor = System.Drawing.Color.Aqua;
+            dgv_godisnjiodmori.Columns["m12"].DefaultCellStyle.BackColor = System.Drawing.Color.Aqua;
+
+            label151.Visible = false;
+        }
+
+        private void Update_GO(int godina)
+        {
+            SqlConnection cnn111 = new SqlConnection(connectionStringPSR);
+            cnn111.Open();
+            string sql11 = "select * FROM plansatirada where godina=" + godina.ToString() + " order by Radnikid,firma,mjesec";
+            SqlCommand cmd11 = new SqlCommand(sql11, cnn111);
+            SqlDataReader reader11 = cmd11.ExecuteReader();
+            
+            int rbr = 1;
+            int id1 = 0, firma1 = 0, mjesec1 = 1;
+            string smjesec = "";
+            label151.Visible = true;
+            label151.Text = "Molim pričekajte !";
+
+            while (reader11.Read())
+            {
+                
+                id1 = (int.Parse)(reader11["Radnikid"].ToString());
+                firma1 = (int.Parse)(reader11["firma"].ToString());
+                mjesec1 = (int.Parse)(reader11["mjesec"].ToString());
+                smjesec = mjesec1.ToString();
+            
+                if (mjesec1 < 10)
+                {
+                    smjesec = "0" + mjesec1.ToString();
+                }
+                string s1 = reader11["Dan01"].ToString() + reader11["Dan02"].ToString() + reader11["Dan03"].ToString() + reader11["Dan04"].ToString() + reader11["Dan05"].ToString() + reader11["Dan06"].ToString() + reader11["Dan07"].ToString() + reader11["Dan08"].ToString() + reader11["Dan09"].ToString() + reader11["Dan10"].ToString();
+                s1 = s1 + reader11["Dan11"].ToString() + reader11["Dan12"].ToString() + reader11["Dan13"].ToString() + reader11["Dan14"].ToString() + reader11["Dan15"].ToString() + reader11["Dan16"].ToString() + reader11["Dan17"].ToString() + reader11["Dan18"].ToString() + reader11["Dan19"].ToString() + reader11["Dan20"].ToString();
+                s1 = s1 + reader11["Dan21"].ToString() + reader11["Dan22"].ToString() + reader11["Dan23"].ToString() + reader11["Dan24"].ToString() + reader11["Dan25"].ToString() + reader11["Dan26"].ToString() + reader11["Dan27"].ToString() + reader11["Dan28"].ToString() + reader11["Dan29"].ToString() + reader11["Dan30"].ToString() + reader11["Dan31"].ToString();
+                int l1 = s1.Length;
+                s1 = s1.Replace("g", "");
+                int l2 = s1.Length;
+                l1 = l1 - l2;
+
+
+                string sql1 = "m" + smjesec.ToString() + "=" + l1.ToString() +" where godina="+godina.ToString()+" and poduzece = "+firma1.ToString()+" and id="+id1.ToString();
+
+                SqlConnection cn1 = new SqlConnection(connectionString);
+                cn1.Open();
+                string sql12 = "select count(*) broj from go where godina=" + godina.ToString() + " and poduzece = " + firma1.ToString() + " and id=" + id1.ToString();
+                SqlCommand cmd12 = new SqlCommand(sql12, cn1);
+                SqlDataReader reader12 = cmd12.ExecuteReader();
+                reader12.Read();
+                int imagavec = 0;
+
+                if (reader12.HasRows)
+                {
+                    if (reader12["broj"].ToString()!="0")
+                    {
+                        imagavec=1;
+                    }
+                }
+                    
+                cn1.Close();
+
+                if (imagavec==0)   // ako jos nije upisan insert
+                {
+                    cn1.Open();
+                    sql12 = "insert into [go] (id,poduzece,godina) values(" + id1.ToString() + "," + firma1.ToString() + "," + godina.ToString() + ")";
+                    cmd12 = new SqlCommand(sql12, cn1);
+                    reader12 = cmd12.ExecuteReader();
+                    reader12.Read();
+                    cn1.Close();
+                }
+
+                // update
+                cn1.Open();
+                sql12 = "update go set "+sql1;
+                cmd12 = new SqlCommand(sql12, cn1);
+                reader12 = cmd12.ExecuteReader();
+                cn1.Close();
+            }
+            //label151.Text = "";
+            //label151.Visible = false;
+        }
+
+
+            private void Btn_godisnjiexport_Click(object sender, EventArgs e)
+        {
+            //Creating DataTable
+            DataTable dt = new DataTable();
+
+            //Adding the Columns
+            foreach (DataGridViewColumn column in dgv_godisnjiodmori.Columns)
+            {
+                dt.Columns.Add(column.HeaderText, column.ValueType);
+            }
+
+            //Adding the Rows
+            foreach (DataGridViewRow row in dgv_godisnjiodmori.Rows)
+            {
+                dt.Rows.Add();
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (cell.Value != null && cell.Value != DBNull.Value)
+                    {
+                        dt.Rows[dt.Rows.Count - 1][cell.ColumnIndex] = cell.Value.ToString();
+                    }
+                }
+            }
+
+            //Exporting to Excel
+            string folderPath = "C:\\KKS\\";
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                wb.Worksheets.Add(dt, "Djelatnici");
+                wb.SaveAs(folderPath + "GodisnjiOdmori2.xlsx");
+            }
+            button2.Text = "Export done";
+
+
+            FileInfo fi = new FileInfo("C:\\kks\\GodisnjiOdmori2.xlsx");
+            if (fi.Exists)
+            {
+                System.Diagnostics.Process.Start(@"C:\\kks\\GodisnjiOdmori2.xlsx");
+            }
+            else
+            {
+                //file doesn't exist
+            }
+
+        }
+
+        private void Button15_Click(object sender, EventArgs e)
+        {
+            //ImageEncodingProperties imgFormat = ImageEncodingProperties.CreateJpeg();
+
+            //// create storage file in local app storage
+            //StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync(
+            //    "TestPhoto.jpg",
+            //    CreationCollisionOption.GenerateUniqueName);
+
+            //// take photo
+            //await captureManager.CapturePhotoToStorageFileAsync(imgFormat, file);
+
+            //// Get photo as a BitmapImage
+            //BitmapImage bmpImage = new BitmapImage(new Uri(file.Path));
+
+            //// imagePreview is a <Image> object defined in XAML
+            //imagePreview.Source = bmpImage;
+        }
+
+        private void Pnl_pricekajte_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void KorekcijaGodišnjegOdmoraToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if ((idloged == "8") || (idadm == "11"))
+            {
+            }
+            else
+            {
+                return;
+            }
+
+
+            pnl_korekcija_go.Visible = true;
+                                  
+
+            using (SqlConnection cnn1 = new SqlConnection(connectionString))
+            {
+
+                var dataSource = new List<radnici>();
+
+                dataSource.Add(new radnici() { prezime = " - ", id = "0" });
+
+                foreach (var radnikk in radnicii)
+                {
+                    dataSource.Add(new radnici() { prezime = radnikk.prezime + " " + radnikk.ime + " - " + radnikk.id.ToString() + " ", id = radnikk.id });
+                }
+
+                cbx_listdjelat_korekcija.MaxDropDownItems = 60;
+                this.cbx_listdjelat_korekcija.DataSource = dataSource;
+                this.cbx_listdjelat_korekcija.DisplayMember = "prezime";
+                this.cbx_listdjelat_korekcija.ValueMember = "id";
+
+            }
+
+
+        }
+
+        private void ComboBox1_SelectedIndexChanged_2(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Button16_Click(object sender, EventArgs e)
+        {
+            int id1 = (int.Parse)(cbx_listdjelat_korekcija.SelectedValue.ToString());
+            string ime1 = cbx_listdjelat_korekcija.Text.ToString();
+            string[] ime1p = ime1.Split(' ');
+            string prez1 = ime1p[0];
+            ime1 = ime1p[1];
+            SqlConnection cnn111 = new SqlConnection(connectionString);
+            cnn111.Open();
+            string sql11 = "select * FROM korekcijago where id=" + id1.ToString() + "";
+            SqlCommand cmd11 = new SqlCommand(sql11, cnn111);
+            SqlDataReader reader11 = cmd11.ExecuteReader();
+            if (reader11.HasRows)
+            {
+                cnn111.Close();
+                cnn111.Open();
+                sql11 = "update korekcijago set korekcija=" + txt_korekcijaGO.Text+" where id="+id1.ToString();
+                cmd11 = new SqlCommand(sql11, cnn111);
+                reader11 = cmd11.ExecuteReader();
+            }
+            else
+            {
+                cnn111.Close();
+                cnn111.Open();
+                sql11 = "insert into korekcijago ( korekcija,id,prezime,ime) values( " + txt_korekcijaGO.Text + "," + id1.ToString() +",'"+prez1+"','"+ime1+"')" ;
+                cmd11 = new SqlCommand(sql11, cnn111);
+                reader11 = cmd11.ExecuteReader();
+            }
+
+            cnn111.Close();
+            pnl_korekcija_go.Visible = false;
+            string host1 = SystemInformation.ComputerName;
+            using (SqlConnection cnn1 = new SqlConnection(connectionString))
+            {
+                cnn1.Open();
+                SqlCommand cmd1 = new SqlCommand("insert into kks_log (datum,korisnik,idprijave,opis) values  ( getdate(),'" + korisnik + "','" + idprijave + "','" + host1 + " - korekcija G.O. za radnik_id=" + id1.ToString() +" nova korekcija="+ txt_korekcijaGO.Text.ToString() + "')", cnn1);
+                SqlDataReader reader1 = cmd1.ExecuteReader();
+                cnn1.Close();
+            }
+
+
+        }
+
+        private void TextBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Btn_prekini_Click(object sender, EventArgs e)
+        {
+            pnl_korekcija_go.Visible = false;
+        }
+
+        private void Btn_odlasci_Click(object sender, EventArgs e){
+            string dat1s = "2019-01-01";
+            string y1s = combo_godina.SelectedItem.ToString();
+            string m1s = txbox_mjesec.Text;
+            DateTime danas = DateTime.Now;
+            int m1 = danas.Month - 1;
+            int y1 = danas.Year;
+            if (m1 == 0)
+            {
+                m1 = 12;
+                y1 = danas.Year - 1;
+            }
+
+            dat1s = y1s + "-" + m1s + "-01";
+            using (SqlConnection cnn1 = new SqlConnection(connectionString))
+            {
+
+                var dataSource = new List<mjesto_troska>();
+
+                dataSource.Add(new mjesto_troska() { naziv = " - ", id = "0" });
+
+                foreach (var mt1 in lista_mt)
+                {
+                    dataSource.Add(new mjesto_troska() { naziv = mt1.naziv, id = mt1.id });
+                }
+
+                combo_mt.MaxDropDownItems = 60;
+                this.combo_mt.DataSource = dataSource;
+                this.combo_mt.DisplayMember = "Naziv";
+                this.combo_mt.ValueMember = "id";
+            }
+
+
+            string sql1 = "select * from(select acregno id, p.acworker ime, CONVERT(varchar, j.addate, 104) datumzaposlenja, CONVERT(varchar, j.addateend, 104) DatumOdlaska, j.acCostDrv MT, j.acdept lokacija, j.acjob RadnoMjesto, 'AT' poduzece, j.acfieldsa, p.actaxid oib, p.acactive from PantheonFxAt.dbo.thr_prsn p " +
+                        " left join PantheonFxAt.dbo.thr_prsnjob j on p.acworker = j.acworker where (j.adDateEnd is not null and  j.addateend > '" + dat1s + "') and rtrim(p.acregno) not  in ('', '0000') and p.acactive='F' union all select acregno id,p2.acworker ime, CONVERT(varchar, j2.addate, 104 ) datumzaposlenja,CONVERT(varchar, j2.addateend, 104) DatumOdlaska,j2.acCostDrv mt, j2.acdept loakcija, j2.acjob RadnoMjesto,'TKB' poduzece,j2.acfieldsa,p2.actaxid oib, p2.acactive " +
+                        " from[PantheonTKB].dbo.thr_prsn p2 left join[PantheonTKB].dbo.thr_prsnjob j2 on p2.acworker = j2.acworker where(j2.adDateEnd is not null and j2.addateend > '" + dat1s + "') and rtrim(p2.acregno) not  in ('', '0000') and p2.acactive='F' )y1 --where addateend is not null " +
+                        " order by ime,datumzaposlenja ";
+
+
+            //string sql1 = "select k.id,k.prezimeime,k.funkcija,k.projekt,k.hala,k.linija,k.mjesto_troska,k.vještine,k.školovanje_posto,k.radnomjesto,k.datumzaposlenja,k.istek_ugovora,k.staz,j.danodlaska,k.godisnji_ostalo from kompetencije k left join ( select * from fxsap.dbo.plansatirada where danodlaska != '' and danodlaska<(dateadd(day,30,getdate())) and danodlaska> (dateadd(day, -30, getdate()))  and danodlaska is not NULL" +
+            //              ") j on j.radnikid = k.id where projekt not in ('xNERADI', 'xNa odlasku') and j.danodlaska is not null order by PrezimeIme desc ";
+
+            string connecStrin = connectionStringpa;
+
+            //if (firmaid == 1)
+            {
+                //    connecStrin = connectionStringpb;
+            }
+
+            SqlConnection connection = new SqlConnection(connecStrin);
+            SqlDataAdapter dataadapter = new SqlDataAdapter(sql1, connection);
+            DataSet ds = new DataSet();
+            connection.Open();
+            dataadapter.Fill(ds, "event");
+            connection.Close();
+
+            // dgv_odred.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.Fill);
+            dgv_naodlasku.DataSource = ds;
+            dgv_naodlasku.DataMember = "event";
+            dgv_naodlasku.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+        }
+
         private void button14_Click(object sender, EventArgs e)
         {
             if (prikaz1 == 1)
@@ -7490,13 +8278,14 @@ namespace Statistika_Bolovanja
 
         }
 
+// update plansatirada prema upisanom
         private void button12_Click(object sender, EventArgs e)
         {
             
             using (SqlConnection cn = new SqlConnection(connectionString))
             {
                 cn.Open();
-                string sql1 = "update fxsap.dbo.plansatirada set  " + danx + " = '" + txtbox_nv.Text.TrimEnd() + "'  where godina=" + g1.ToString() + " and mjesec=" + m1.ToString() + " and radnikid=" + ssindex1.ToString();
+                string sql1 = "update fxsap.dbo.plansatirada set  " + danx + " = '" + txtbox_nv.Text.TrimEnd() + "'  where godina=" + g1.ToString() + " and mjesec=" + m1.ToString() + " and firma="+poduzece1+" and radnikid=" + ssindex1.ToString();
 
                 SqlCommand sqlCommand = new SqlCommand(sql1, cn);
                 SqlDataReader reader = sqlCommand.ExecuteReader();
@@ -7555,7 +8344,7 @@ namespace Statistika_Bolovanja
 
             sql1 = "select x1.acregno ID, x1.acworker PrezimeIme, x1.addateenter DatumDolaska, x1.addateend DatumOdlaska, x1.acjob RadnoMjesto, x1.acdept Lokacija, x1.accostdrv MjestoTroška,x1.BrojDanaGodisnjeg, x1.poduzece Poduzeće from( select p.acregno, p.acworker, p.addateenter, j.addateend, j.acjob, j.acdept, j.accostdrv,v.anvacationf1 BrojDanaGodisnjeg, 'FX' poduzece from PantheonFxAt.dbo.thr_prsnjob j left join PantheonFxAt.dbo.thr_prsn p on p.acworker = j.acworker left join PantheonFxAt.dbo.thr_prsnvacation v on p.acworker = v.acworker where j.addateend between '" + dat10+"' and '"+dat20+ "'  " +
                 "and p.acworker not in ( select acworker from PantheonFxAt.dbo.thr_prsnjob where addateend is null  )  " +
-                  "union all select p.acregno, p.acworker, p.addateenter, j.addateend, j.acjob, j.acdept, j.accostdrv,v.anvacationf1 BrojDanaGodisnjeg, 'TKB' poduzece from PantheonTKB.dbo.thr_prsnjob j  left join PantheonTKB.dbo.thr_prsn p on p.acworker = j.acworker left join PantheonTKB.dbo.thr_prsnvacation v on p.acworker = v.acworker   where j.addateend between '" + dat10+"' and '"+dat20+ "' " +
+                  "union all select p.acregno, p.acworker, p.addateenter, j.addateend, j.acjob, j.acdept, j.accostdrv,v.anvacationKids BrojDanaGodisnjeg, 'TKB' poduzece from PantheonTKB.dbo.thr_prsnjob j  left join PantheonTKB.dbo.thr_prsn p on p.acworker = j.acworker left join PantheonTKB.dbo.thr_prsnvacation v on p.acworker = v.acworker   where j.addateend between '" + dat10+"' and '"+dat20+ "' " +
                   "and p.acworker not in (select acworker from PantheonTKB.dbo.thr_prsnjob where addateend is null  )  ) x1 order by x1.acworker ";
 
             
@@ -7593,7 +8382,7 @@ namespace Statistika_Bolovanja
             else
             {
                 sql1 = "select cast(acregno as int ) as Id,acname Ime,acsurname Prezime,j.acCostDrv Mjesto_troška,j.acDept Lokacija,d.acnumber RFID,j.acjob Radno_mjesto,'' Radni_staz,p.adDateEnter DatumZaposlenja,'' sifra_rm,p.acstreet Ulica,acpost Pošta,'' vrijeme,accity Grad,j.acFieldSA Vrsta_isplate, adDateExit Datum_odlaska from thr_prsn p left join thr_prsnjob j on p.acworker = j.acworker left join thr_prsnadddoc d on d.acWorker = p.acworker and d.actype = 8 " +
-                "where d.actype=8 and j.dateend is null and p.addateenter>=dateadd(d,-3,getdate()) order by cast(acregno as int) desc ";
+                "where d.actype=8 and j.addateend is null and p.addateenter>=dateadd(d,-3,getdate()) order by cast(acregno as int) desc ";
             }
             
             string connecStrin = connectionStringpa;

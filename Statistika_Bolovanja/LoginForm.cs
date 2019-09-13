@@ -17,6 +17,12 @@ namespace Statistika_Bolovanja
     {
         public string connectionString = @"Data Source=192.168.0.5;Initial Catalog=RFIND;User ID=sa;Password=AdminFX9.";
         public static string idusera1,idadmin,korisnik,idprijave;
+
+        private void Label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
         public LoginForm()
         {
             InitializeComponent();
