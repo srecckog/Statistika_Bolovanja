@@ -46,6 +46,8 @@
             this.pregledPromjenaVještinaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tVPorukeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.raznoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.korekcijaGodišnjegOdmoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.normaSatiPrintToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.popisDjelatnikaNaOdređenomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pregledVještinaPoProjketuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -390,16 +392,19 @@
             this.dgv_godisnjiodmori = new System.Windows.Forms.DataGridView();
             this.pnl_pricekajte = new System.Windows.Forms.Panel();
             this.label152 = new System.Windows.Forms.Label();
-            this.korekcijaGodišnjegOdmoraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pnl_korekcija_go = new System.Windows.Forms.Panel();
-            this.cbx_listdjelat_korekcija = new System.Windows.Forms.ComboBox();
-            this.label153 = new System.Windows.Forms.Label();
-            this.txt_korekcijaGO = new System.Windows.Forms.TextBox();
-            this.btn_spremi_korekcija_go = new System.Windows.Forms.Button();
-            this.label154 = new System.Windows.Forms.Label();
-            this.panel4 = new System.Windows.Forms.Panel();
-            this.label155 = new System.Windows.Forms.Label();
             this.btn_prekini = new System.Windows.Forms.Button();
+            this.label155 = new System.Windows.Forms.Label();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.label154 = new System.Windows.Forms.Label();
+            this.btn_spremi_korekcija_go = new System.Windows.Forms.Button();
+            this.txt_korekcijaGO = new System.Windows.Forms.TextBox();
+            this.label153 = new System.Windows.Forms.Label();
+            this.cbx_listdjelat_korekcija = new System.Windows.Forms.ComboBox();
+            this.pnl_normasati_print = new System.Windows.Forms.Panel();
+            this.btn_print_normasati = new System.Windows.Forms.Button();
+            this.printDocument1 = new System.Drawing.Printing.PrintDocument();
+            this.printDialog1 = new System.Windows.Forms.PrintDialog();
             this.menuStrip1.SuspendLayout();
             this.pl_zbirni.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_zbirni)).BeginInit();
@@ -447,6 +452,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgv_godisnjiodmori)).BeginInit();
             this.pnl_pricekajte.SuspendLayout();
             this.pnl_korekcija_go.SuspendLayout();
+            this.pnl_normasati_print.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -555,7 +561,8 @@
             this.pregledPromjenaVještinaToolStripMenuItem,
             this.tVPorukeToolStripMenuItem,
             this.raznoToolStripMenuItem,
-            this.korekcijaGodišnjegOdmoraToolStripMenuItem});
+            this.korekcijaGodišnjegOdmoraToolStripMenuItem,
+            this.normaSatiPrintToolStripMenuItem});
             this.administracijaToolStripMenuItem.Name = "administracijaToolStripMenuItem";
             this.administracijaToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
             this.administracijaToolStripMenuItem.Text = "Administracija";
@@ -602,6 +609,20 @@
             this.raznoToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
             this.raznoToolStripMenuItem.Text = "Razno";
             this.raznoToolStripMenuItem.Click += new System.EventHandler(this.raznoToolStripMenuItem_Click);
+            // 
+            // korekcijaGodišnjegOdmoraToolStripMenuItem
+            // 
+            this.korekcijaGodišnjegOdmoraToolStripMenuItem.Name = "korekcijaGodišnjegOdmoraToolStripMenuItem";
+            this.korekcijaGodišnjegOdmoraToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.korekcijaGodišnjegOdmoraToolStripMenuItem.Text = "Korekcija godišnjeg odmora";
+            this.korekcijaGodišnjegOdmoraToolStripMenuItem.Click += new System.EventHandler(this.KorekcijaGodišnjegOdmoraToolStripMenuItem_Click);
+            // 
+            // normaSatiPrintToolStripMenuItem
+            // 
+            this.normaSatiPrintToolStripMenuItem.Name = "normaSatiPrintToolStripMenuItem";
+            this.normaSatiPrintToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.normaSatiPrintToolStripMenuItem.Text = "Norma sati - print";
+            this.normaSatiPrintToolStripMenuItem.Click += new System.EventHandler(this.NormaSatiPrintToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
@@ -4100,13 +4121,6 @@
             this.label152.TabIndex = 0;
             this.label152.Text = "Pričekajte, obrađujem podatke !";
             // 
-            // korekcijaGodišnjegOdmoraToolStripMenuItem
-            // 
-            this.korekcijaGodišnjegOdmoraToolStripMenuItem.Name = "korekcijaGodišnjegOdmoraToolStripMenuItem";
-            this.korekcijaGodišnjegOdmoraToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
-            this.korekcijaGodišnjegOdmoraToolStripMenuItem.Text = "Korekcija godišnjeg odmora";
-            this.korekcijaGodišnjegOdmoraToolStripMenuItem.Click += new System.EventHandler(this.KorekcijaGodišnjegOdmoraToolStripMenuItem_Click);
-            // 
             // pnl_korekcija_go
             // 
             this.pnl_korekcija_go.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -4124,58 +4138,15 @@
             this.pnl_korekcija_go.TabIndex = 4;
             this.pnl_korekcija_go.Visible = false;
             // 
-            // cbx_listdjelat_korekcija
+            // btn_prekini
             // 
-            this.cbx_listdjelat_korekcija.FormattingEnabled = true;
-            this.cbx_listdjelat_korekcija.Location = new System.Drawing.Point(60, 69);
-            this.cbx_listdjelat_korekcija.Name = "cbx_listdjelat_korekcija";
-            this.cbx_listdjelat_korekcija.Size = new System.Drawing.Size(264, 21);
-            this.cbx_listdjelat_korekcija.TabIndex = 0;
-            this.cbx_listdjelat_korekcija.SelectedIndexChanged += new System.EventHandler(this.ComboBox1_SelectedIndexChanged_2);
-            // 
-            // label153
-            // 
-            this.label153.AutoSize = true;
-            this.label153.Location = new System.Drawing.Point(57, 127);
-            this.label153.Name = "label153";
-            this.label153.Size = new System.Drawing.Size(55, 13);
-            this.label153.TabIndex = 1;
-            this.label153.Text = "Broj dana ";
-            // 
-            // txt_korekcijaGO
-            // 
-            this.txt_korekcijaGO.Location = new System.Drawing.Point(223, 126);
-            this.txt_korekcijaGO.Name = "txt_korekcijaGO";
-            this.txt_korekcijaGO.Size = new System.Drawing.Size(100, 20);
-            this.txt_korekcijaGO.TabIndex = 2;
-            this.txt_korekcijaGO.TextChanged += new System.EventHandler(this.TextBox2_TextChanged);
-            // 
-            // btn_spremi_korekcija_go
-            // 
-            this.btn_spremi_korekcija_go.Location = new System.Drawing.Point(249, 169);
-            this.btn_spremi_korekcija_go.Name = "btn_spremi_korekcija_go";
-            this.btn_spremi_korekcija_go.Size = new System.Drawing.Size(75, 23);
-            this.btn_spremi_korekcija_go.TabIndex = 3;
-            this.btn_spremi_korekcija_go.Text = "Spremi";
-            this.btn_spremi_korekcija_go.UseVisualStyleBackColor = true;
-            this.btn_spremi_korekcija_go.Click += new System.EventHandler(this.Button16_Click);
-            // 
-            // label154
-            // 
-            this.label154.AutoSize = true;
-            this.label154.Location = new System.Drawing.Point(62, 53);
-            this.label154.Name = "label154";
-            this.label154.Size = new System.Drawing.Size(101, 13);
-            this.label154.TabIndex = 4;
-            this.label154.Text = "Odaberite djelatnika";
-            // 
-            // panel4
-            // 
-            this.panel4.BackColor = System.Drawing.Color.Navy;
-            this.panel4.Location = new System.Drawing.Point(0, 32);
-            this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(455, 10);
-            this.panel4.TabIndex = 5;
+            this.btn_prekini.Location = new System.Drawing.Point(84, 169);
+            this.btn_prekini.Name = "btn_prekini";
+            this.btn_prekini.Size = new System.Drawing.Size(75, 23);
+            this.btn_prekini.TabIndex = 7;
+            this.btn_prekini.Text = "Odustani";
+            this.btn_prekini.UseVisualStyleBackColor = true;
+            this.btn_prekini.Click += new System.EventHandler(this.Btn_prekini_Click);
             // 
             // label155
             // 
@@ -4187,21 +4158,88 @@
             this.label155.TabIndex = 6;
             this.label155.Text = "Korekcija dana godišnjeg odmora";
             // 
-            // btn_prekini
+            // panel4
             // 
-            this.btn_prekini.Location = new System.Drawing.Point(84, 169);
-            this.btn_prekini.Name = "btn_prekini";
-            this.btn_prekini.Size = new System.Drawing.Size(75, 23);
-            this.btn_prekini.TabIndex = 7;
-            this.btn_prekini.Text = "Odustani";
-            this.btn_prekini.UseVisualStyleBackColor = true;
-            this.btn_prekini.Click += new System.EventHandler(this.Btn_prekini_Click);
+            this.panel4.BackColor = System.Drawing.Color.Navy;
+            this.panel4.Location = new System.Drawing.Point(0, 32);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(455, 10);
+            this.panel4.TabIndex = 5;
+            // 
+            // label154
+            // 
+            this.label154.AutoSize = true;
+            this.label154.Location = new System.Drawing.Point(62, 53);
+            this.label154.Name = "label154";
+            this.label154.Size = new System.Drawing.Size(101, 13);
+            this.label154.TabIndex = 4;
+            this.label154.Text = "Odaberite djelatnika";
+            // 
+            // btn_spremi_korekcija_go
+            // 
+            this.btn_spremi_korekcija_go.Location = new System.Drawing.Point(249, 169);
+            this.btn_spremi_korekcija_go.Name = "btn_spremi_korekcija_go";
+            this.btn_spremi_korekcija_go.Size = new System.Drawing.Size(75, 23);
+            this.btn_spremi_korekcija_go.TabIndex = 3;
+            this.btn_spremi_korekcija_go.Text = "Spremi";
+            this.btn_spremi_korekcija_go.UseVisualStyleBackColor = true;
+            this.btn_spremi_korekcija_go.Click += new System.EventHandler(this.Button16_Click);
+            // 
+            // txt_korekcijaGO
+            // 
+            this.txt_korekcijaGO.Location = new System.Drawing.Point(223, 126);
+            this.txt_korekcijaGO.Name = "txt_korekcijaGO";
+            this.txt_korekcijaGO.Size = new System.Drawing.Size(100, 20);
+            this.txt_korekcijaGO.TabIndex = 2;
+            this.txt_korekcijaGO.TextChanged += new System.EventHandler(this.TextBox2_TextChanged);
+            // 
+            // label153
+            // 
+            this.label153.AutoSize = true;
+            this.label153.Location = new System.Drawing.Point(57, 127);
+            this.label153.Name = "label153";
+            this.label153.Size = new System.Drawing.Size(55, 13);
+            this.label153.TabIndex = 1;
+            this.label153.Text = "Broj dana ";
+            // 
+            // cbx_listdjelat_korekcija
+            // 
+            this.cbx_listdjelat_korekcija.FormattingEnabled = true;
+            this.cbx_listdjelat_korekcija.Location = new System.Drawing.Point(60, 69);
+            this.cbx_listdjelat_korekcija.Name = "cbx_listdjelat_korekcija";
+            this.cbx_listdjelat_korekcija.Size = new System.Drawing.Size(264, 21);
+            this.cbx_listdjelat_korekcija.TabIndex = 0;
+            this.cbx_listdjelat_korekcija.SelectedIndexChanged += new System.EventHandler(this.ComboBox1_SelectedIndexChanged_2);
+            // 
+            // pnl_normasati_print
+            // 
+            this.pnl_normasati_print.Controls.Add(this.btn_print_normasati);
+            this.pnl_normasati_print.Location = new System.Drawing.Point(265, 37);
+            this.pnl_normasati_print.Name = "pnl_normasati_print";
+            this.pnl_normasati_print.Size = new System.Drawing.Size(585, 387);
+            this.pnl_normasati_print.TabIndex = 3;
+            this.pnl_normasati_print.Visible = false;
+            // 
+            // btn_print_normasati
+            // 
+            this.btn_print_normasati.Location = new System.Drawing.Point(152, 135);
+            this.btn_print_normasati.Name = "btn_print_normasati";
+            this.btn_print_normasati.Size = new System.Drawing.Size(235, 23);
+            this.btn_print_normasati.TabIndex = 0;
+            this.btn_print_normasati.Text = "Print izvještaje Norma sati";
+            this.btn_print_normasati.UseVisualStyleBackColor = true;
+            this.btn_print_normasati.Click += new System.EventHandler(this.Btn_print_normasati_Click);
+            // 
+            // printDialog1
+            // 
+            this.printDialog1.UseEXDialog = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1684, 963);
+            this.Controls.Add(this.pnl_normasati_print);
             this.Controls.Add(this.pnl_korekcija_go);
             this.Controls.Add(this.pnl_pricekajte);
             this.Controls.Add(this.pnl_godisnjiodmor2);
@@ -4300,6 +4338,7 @@
             this.pnl_pricekajte.PerformLayout();
             this.pnl_korekcija_go.ResumeLayout(false);
             this.pnl_korekcija_go.PerformLayout();
+            this.pnl_normasati_print.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -4679,6 +4718,11 @@
         private System.Windows.Forms.Label label153;
         private System.Windows.Forms.ComboBox cbx_listdjelat_korekcija;
         private System.Windows.Forms.Button btn_prekini;
+        private System.Windows.Forms.ToolStripMenuItem normaSatiPrintToolStripMenuItem;
+        private System.Windows.Forms.Panel pnl_normasati_print;
+        private System.Windows.Forms.Button btn_print_normasati;
+        private System.Drawing.Printing.PrintDocument printDocument1;
+        private System.Windows.Forms.PrintDialog printDialog1;
     }
 }
 

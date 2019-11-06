@@ -12,6 +12,14 @@ using System.Text.RegularExpressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Globalization;
+using System.Drawing.Printing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Text;
+using System.Drawing.Printing;
+using System.Collections.Generic;
+using System.Windows.Forms;
+using Microsoft.Reporting.WinForms;
 
 //using Microsoft.Office.Interop.Word;
 
@@ -1956,6 +1964,7 @@ namespace Statistika_Bolovanja
         #region ocisti, isprazni labals
         private void OcistiPanele()
         {
+            pnl_normasati_print.Visible = false;
             pnl_godisnjiodmor2.Visible = false;
             pnl_odredeno.Visible = false;
             pnl_norme.Visible = false;
@@ -7852,7 +7861,7 @@ namespace Statistika_Bolovanja
 
                 if (aktivan1=="F")
                 {
-                    continue;
+                    //continue;
                 }
 
 
@@ -7897,7 +7906,7 @@ namespace Statistika_Bolovanja
                 using (SqlConnection cnn1 = new SqlConnection(connectionString))
                 {
                     string datumzap1 = datz1.Year.ToString()+"-"+datz1.Month.ToString() + "-"+datz1.Day.ToString();
-                    string sql1 = "delete from godisnjiodmor2 where id="+ssindex+" and poduzece="+poduz1+" ;insert into godisnjiodmor2 ( id,ime,prezime,radnistaz,datumzaposlenja,poduzece,mt,lokacija,novigo) values(" + ssindex + ",'" + ime1 + "','" + prezime1 + "','"+staz1+"','"+ datumzap1 +"'," + poduz1 + "," + mt1 + "," + lokacija1 + "," + bdanag.ToString() + ")";
+                    string sql1 = "delete from godisnjiodmor2 where id="+ssindex+" and poduzece="+poduz1+" ;insert into godisnjiodmor2 ( id,ime,aktivan,prezime,radnistaz,datumzaposlenja,poduzece,mt,lokacija,novigo) values(" + ssindex + ",'" + ime1 + "','"+aktivan1+"','" + prezime1 + "','"+staz1+"','"+ datumzap1 +"'," + poduz1 + "," + mt1 + "," + lokacija1 + "," + bdanag.ToString() + ")";
                     cnn1.Open();
                     SqlCommand cmd1 = new SqlCommand(sql1, cnn1);
                     SqlDataReader reader1 = cmd1.ExecuteReader();
@@ -7916,7 +7925,7 @@ namespace Statistika_Bolovanja
 
             //Update_GO(DateTime.Now.Year);
 
-            string sql12 = "select O.ID,o.Poduzece,o.managerid Voditelj,o.Prezime,o.Ime,o.DatumZaposlenja,o.RadniStaz,o.MT,o.Lokacija,o.NoviGO,o.StariGO,isnull(k.Korekcija,0) Korekcija,( isnull(g.m07,0)+isnull(g.m08,0)+isnull(g.m09,0)+isnull(g.m10,0)+isnull(g.m11,0)+isnull(g.m12,0)) IskoristioGO,(isnull(k.korekcija,0)+o.novigo-((isnull(g.m07,0)+isnull(g.m08,0)+isnull(g.m09,0)+isnull(g.m10,0)+isnull(g.m11,0)+isnull(g.m12,0)))) PreostaliGO,g.m01,g.m02,g.m03,g.m04,g.m05,g.m06,g.m07,g.m08,g.m09,g.m10,g.m11,g.m12 from godisnjiodmor2 o left join [go] g on g.id=o.id and g.poduzece=o.poduzece left join korekcijago k on k.id=o.id order by prezime";
+            string sql12 = "select O.ID,o.Poduzece,o.managerid Voditelj,o.Aktivan,o.Prezime,o.Ime,o.DatumZaposlenja,o.RadniStaz,o.MT,o.Lokacija,o.NoviGO,o.StariGO,isnull(k.Korekcija,0) Korekcija,( isnull(g.m07,0)+isnull(g.m08,0)+isnull(g.m09,0)+isnull(g.m10,0)+isnull(g.m11,0)+isnull(g.m12,0)) IskoristioGO,(isnull(k.korekcija,0)+o.novigo-((isnull(g.m07,0)+isnull(g.m08,0)+isnull(g.m09,0)+isnull(g.m10,0)+isnull(g.m11,0)+isnull(g.m12,0)))) PreostaliGO,g.m01,g.m02,g.m03,g.m04,g.m05,g.m06,g.m07,g.m08,g.m09,g.m10,g.m11,g.m12 from godisnjiodmor2 o left join [go] g on g.id=o.id and g.poduzece=o.poduzece left join korekcijago k on k.id=o.id order by prezime";
             connectionString = @"Data Source=192.168.0.3;Initial Catalog = RFIND ; User ID=sa ; Password=AdminFX9.";
             SqlConnection connection = new SqlConnection(connectionString);
             SqlDataAdapter dataadapter = new SqlDataAdapter(sql12, connection);
@@ -8184,6 +8193,143 @@ namespace Statistika_Bolovanja
         {
             pnl_korekcija_go.Visible = false;
         }
+
+        private void NormaSatiPrintToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            pnl_normasati_print.Visible = true;
+          
+
+        }
+        private static StreamReader stream;
+        private void Btn_print_normasati_Click(object sender, EventArgs e)
+        {
+            //LocalReport report = new LocalReport();
+            //report.ReportPath = @"..\..\Report.rdlc";
+            //report.DataSources.Add(
+            //   new ReportDataSource("Sales", LoadSalesData()));
+            //Export(report);
+            //stream = new StreamReader("PrintMe.txt");
+            PrintDocument p = new PrintDocument();
+            p.PrintPage += new PrintPageEventHandler(PrintPage);
+            p.Print();
+            //stream.Close();
+
+            //PrintDialog printdialog1 = new PrintDialog();
+            //if (m_streams == null || m_streams.Count == 0)
+            //    throw new Exception("Error: no stream to print.");
+            //PrintDocument printDoc = new PrintDocument();
+            //if (!printDoc.PrinterSettings.IsValid)
+            //{
+            //    throw new Exception("Error: cannot find the default printer.");
+            //}
+            //else
+            //{
+            //    printDoc.PrintPage += new PrintPageEventHandler(PrintPage);
+            //    m_currentPageIndex = 0;
+            //    printDoc.Print();
+            //}
+            OcistiPanele();
+        }
+
+        private int m_currentPageIndex;
+        private IList<Stream> m_streams;
+
+        private DataTable LoadSalesData()
+        {
+            // Create a new DataSet and read sales data file 
+            //    data.xml into the first DataTable.
+            DataSet dataSet = new DataSet();
+            dataSet.ReadXml(@"..\..\data.xml");
+            return dataSet.Tables[0];
+        }
+        // Routine to provide to the report renderer, in order to
+        //    save an image for each page of the report.
+        private Stream CreateStream(string name,
+          string fileNameExtension, Encoding encoding,
+          string mimeType, bool willSeek)
+        {
+            Stream stream = new MemoryStream();
+            m_streams.Add(stream);
+            return stream;
+        }
+        // Export the given report as an EMF (Enhanced Metafile) file.
+        private void Export(LocalReport report)
+        {
+            string deviceInfo =
+              @"<DeviceInfo>
+                <OutputFormat>EMF</OutputFormat>
+                <PageWidth>8.5in</PageWidth>
+                <PageHeight>11in</PageHeight>
+                <MarginTop>0.25in</MarginTop>
+                <MarginLeft>0.25in</MarginLeft>
+                <MarginRight>0.25in</MarginRight>
+                <MarginBottom>0.25in</MarginBottom>
+            </DeviceInfo>";
+            Warning[] warnings;
+            m_streams = new List<Stream>();
+            report.Render("Image", deviceInfo, CreateStream,
+               out warnings);
+            foreach (Stream stream in m_streams)
+                stream.Position = 0;
+        }
+        // Handler for PrintPageEvents
+        private void PrintPage(object sender, PrintPageEventArgs e)
+        {
+            float lines_page, y;
+            int count = 0;
+            float left = e.MarginBounds.Left;
+            float top = e.MarginBounds.Top;
+            String line = null;
+            System.Drawing.Font font = new System.Drawing.Font("Arial", 10);
+            float font_height = font.GetHeight(e.Graphics);
+            lines_page = e.MarginBounds.Height / font_height;
+            lines_page = 6;
+            y = top + (count * font_height);
+            line = "IZVJEŠĆE O RADU".PadLeft(60, ' ');
+            e.Graphics.DrawString(line, font, Brushes.Black, left, y, new StringFormat());
+            count = 2;
+
+            while (count < lines_page)
+            {
+                //line = stream.ReadLine();
+                line = "Izvješće o radu";
+                if (line == null)
+                    break;
+
+                y =  top + (count * font_height);
+                e.Graphics.DrawString(line, font, Brushes.Black, left, y, new StringFormat());
+
+                count++;
+            }
+
+
+            if ( count < 4 )
+                {
+
+                    e.HasMorePages = false;
+
+                //if (line != null)
+                //    e.HasMorePages = true;
+                //else
+                //    e.HasMorePages = false;
+            }
+
+        }
+        public void Dispose()
+        {
+            if (m_streams != null)
+            {
+                foreach (Stream stream in m_streams)
+                    stream.Close();
+                m_streams = null;
+            }
+        }
+
+        /// <summary>
+        /// //////////////////////////////////////////////////////////////////////
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
 
         private void Btn_odlasci_Click(object sender, EventArgs e){
             string dat1s = "2019-01-01";
