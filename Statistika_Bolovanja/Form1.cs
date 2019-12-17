@@ -28,7 +28,8 @@ namespace Statistika_Bolovanja
 {
     public partial class Form1 : Form
     {
-        public string connectionString = @"Data Source=192.168.0.3;Initial Catalog = RFIND ; User ID=sa ; Password=AdminFX9.";
+        public string connectionString = @"Data Source=192.168.0.3;Initial Catalog = fx_RFIND ; User ID=sa ; Password=AdminFX9.";
+        public string connectionString2 = @"Data Source=192.168.0.3;Initial Catalog = RFIND ; User ID=sa ; Password=AdminFX9.";
         public string connectionStringPSR = @"Data Source=192.168.0.3;Initial Catalog = FXSAP ; User ID=sa ; Password=AdminFX9.";
         public string connectionStringFeroapp = @"Data Source=192.168.0.3;Initial Catalog = Feroapp ; User ID=sa ; Password=AdminFX9.";
         public string connectionStringpa = @"Data Source=192.168.0.6;Initial Catalog =PantheonFxAt; User ID=sa ; Password=AdminFX9.";
@@ -1380,7 +1381,13 @@ namespace Statistika_Bolovanja
                         //hala1 = (int.Parse)(row.Cells[2].Value.ToString());
                         //linija1 = (int.Parse)(row.Cells[1].Value.ToString());
                         norm1 = (int.Parse)(row.Cells[4].Value.ToString());
-                        int kol = (int.Parse)(row.Cells[6].Value.ToString());
+                        int kol = 0;
+                        if (row.Cells[6].Value== DBNull.Value)
+                        { int z = 0; }
+                        else
+                        {
+                            kol = (int.Parse)(row.Cells[6].Value.ToString());
+                        }
                         string ts1 = row.Cells[11].Value.ToString();
                         string ts2 = row.Cells[12].Value.ToString();
                         
@@ -3945,7 +3952,7 @@ namespace Statistika_Bolovanja
             cn2.Close();
 
 
-            string sql1 = "select * from rfind.dbo.evidnormiradad('" + d11 + "','" + d22 + "') order by radnik"; //" + smj; bez računanja efektivnog radnog vremena  
+            string sql1 = "select * from fx_rfind.dbo.evidnormiradad('" + d11 + "','" + d22 + "') order by radnik"; //" + smj; bez računanja efektivnog radnog vremena  
 
             // sql1 = "rfind.dbo.ldp_recalc '" + dat13 + "','" + dat23 + "',41";
             SqlConnection cn = new SqlConnection(connectionString);
@@ -4111,7 +4118,7 @@ namespace Statistika_Bolovanja
                     }
                 }
 
-                sql11 = "rfind.dbo.ldp_recalc '"+m1.ToString()+"."+g1.ToString()+"','"+id_fink.ToString()+"',100";
+                sql11 = "fx_rfind.dbo.ldp_recalc '"+m1.ToString()+"."+g1.ToString()+"','"+id_fink.ToString()+"',100";
                 cn2 = new SqlConnection(connectionString);
                 cn2.Open();
                 sqlCommand1 = new SqlCommand(sql11, cn2);
@@ -6461,7 +6468,7 @@ namespace Statistika_Bolovanja
             pnl_naodlasku.Visible = true;
             btn_godisnji.Visible = false;
             btn_odlasci.Visible = true;
-            label130.Text = "Pregld djelatnika koji su otišli u zadanom periodu";
+            label130.Text = "Pregled djelatnika koji su otišli u zadanom periodu";
             
             using (SqlConnection cnn1 = new SqlConnection(connectionString))
             {
@@ -6773,7 +6780,7 @@ namespace Statistika_Bolovanja
         {
             pnl_preglSkolovanja.Visible = true;
             string sql1 = "select s.*,r.datumzaposlenja Datum_zaposlenja,k.školovanje_posto,k.funkcija Funkcija from skolovanje s left join radnici_ r left join kompetencije k on k.id=r.id on r.id=s.idradnika where gotovo=0 order by k.prezimeime,izmjenaod";
-            string connecStrin = @"Data Source=192.168.0.3;Initial Catalog=RFIND;User ID=fx_public;Password=.";
+            string connecStrin = @"Data Source=192.168.0.3;Initial Catalog=fx_RFIND;User ID=fx_public;Password=.";
 
             SqlConnection connection = new SqlConnection(connecStrin);
             SqlDataAdapter dataadapter = new SqlDataAdapter(sql1, connection);
@@ -7926,7 +7933,7 @@ namespace Statistika_Bolovanja
             //Update_GO(DateTime.Now.Year);
 
             string sql12 = "select O.ID,o.Poduzece,o.managerid Voditelj,o.Aktivan,o.Prezime,o.Ime,o.DatumZaposlenja,o.RadniStaz,o.MT,o.Lokacija,o.NoviGO,o.StariGO,isnull(k.Korekcija,0) Korekcija,( isnull(g.m07,0)+isnull(g.m08,0)+isnull(g.m09,0)+isnull(g.m10,0)+isnull(g.m11,0)+isnull(g.m12,0)) IskoristioGO,(isnull(k.korekcija,0)+o.novigo-((isnull(g.m07,0)+isnull(g.m08,0)+isnull(g.m09,0)+isnull(g.m10,0)+isnull(g.m11,0)+isnull(g.m12,0)))) PreostaliGO,g.m01,g.m02,g.m03,g.m04,g.m05,g.m06,g.m07,g.m08,g.m09,g.m10,g.m11,g.m12 from godisnjiodmor2 o left join [go] g on g.id=o.id and g.poduzece=o.poduzece left join korekcijago k on k.id=o.id order by prezime";
-            connectionString = @"Data Source=192.168.0.3;Initial Catalog = RFIND ; User ID=sa ; Password=AdminFX9.";
+            connectionString = @"Data Source=192.168.0.3;Initial Catalog = fx_RFIND ; User ID=sa ; Password=AdminFX9.";
             SqlConnection connection = new SqlConnection(connectionString);
             SqlDataAdapter dataadapter = new SqlDataAdapter(sql12, connection);
             DataSet ds = new DataSet();
@@ -8211,7 +8218,9 @@ namespace Statistika_Bolovanja
             //stream = new StreamReader("PrintMe.txt");
             PrintDocument p = new PrintDocument();
             p.PrintPage += new PrintPageEventHandler(PrintPage);
-            p.Print();
+            printPreviewDialog1.Document=p ;
+            printPreviewDialog1.ShowDialog();
+            //p.Print();
             //stream.Close();
 
             //PrintDialog printdialog1 = new PrintDialog();
@@ -8280,24 +8289,32 @@ namespace Statistika_Bolovanja
             float left = e.MarginBounds.Left;
             float top = e.MarginBounds.Top;
             String line = null;
-            System.Drawing.Font font = new System.Drawing.Font("Arial", 10);
+            System.Drawing.Font font = new System.Drawing.Font("Arial", 20);
+            System.Drawing.Font font2 = new System.Drawing.Font("Arial", 10);
             float font_height = font.GetHeight(e.Graphics);
             lines_page = e.MarginBounds.Height / font_height;
             lines_page = 6;
             y = top + (count * font_height);
-            line = "IZVJEŠĆE O RADU".PadLeft(60, ' ');
+            line = "IZVJEŠĆE O RADU".PadLeft(30, ' ');
             e.Graphics.DrawString(line, font, Brushes.Black, left, y, new StringFormat());
             count = 2;
+            y = y + font.GetHeight(e.Graphics)+40;
+            line = "Datum     Smjena  Vrsta   Norma   Količina Koeficijent";
+            e.Graphics.DrawString(line, font2, Brushes.Black, left, y , new StringFormat());
+            y = y + font2.GetHeight(e.Graphics);
+            line = "____________________________________________";
+            e.Graphics.DrawString(line, font2, Brushes.Black, left, y , new StringFormat());
+
 
             while (count < lines_page)
             {
                 //line = stream.ReadLine();
-                line = "Izvješće o radu";
+                
                 if (line == null)
                     break;
 
                 y =  top + (count * font_height);
-                e.Graphics.DrawString(line, font, Brushes.Black, left, y, new StringFormat());
+             
 
                 count++;
             }
@@ -8323,6 +8340,67 @@ namespace Statistika_Bolovanja
                     stream.Close();
                 m_streams = null;
             }
+        }
+
+        private void PrintPreviewDialog1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void PregledIzvršenjaNormiPoDanimaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            pnl_normas_unos.Visible = true;
+
+        }
+
+        private void Button16_Click_1(object sender, EventArgs e)
+        {
+
+            using ( SqlConnection cn  =new SqlConnection(connectionString))
+            {
+                
+                
+                DateTime d1 = new DateTime((int.Parse)(txtbox_godina_ns.Text), (int.Parse)(txtbox_mjesec_ns.Text), 1);
+                DateTime d2 = d1.AddMonths(1).AddDays(-1);
+                string dat1 = d1.Year.ToString() + '-' + d1.Month.ToString() + '-' + d1.Day.ToString();
+                string dat2 = d2.Year.ToString() + '-' + d2.Month.ToString() + '-' + d2.Day.ToString();
+                
+                string sql1 = "fx_rfind.dbo.mior '"+dat1+"','"+dat2+"'" ;
+
+
+                //SqlCommand sql1 = new SqlCommand("fx_rfind.dbo.mior "+dat1+","+dat2 , cn ) ;
+                //SqlDataReader sqlr = sql1.ExecuteReader();
+                //DataSet ds1 = new DataSet();
+                //ds1.Tables("ds1");
+                //dgv_normas.f
+
+                
+                SqlDataAdapter dataadapter = new SqlDataAdapter(sql1, cn);
+                DataSet ds = new DataSet();
+                cn.Open();
+                dataadapter.Fill(ds, "event");
+                dgv_normas.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+                dgv_normas.DataSource = ds;
+                dgv_normas.DataMember = "event";
+                cn.Close();
+            }
+           
+
+
+           // pnl_normas_unos.Visible = false;
+            pnl_normas_tabela.Visible = true;
+            pnl_normas_tabela.Height = 800;
+            dgv_normas.Height = 750;
+        }
+
+        private void TextBox3_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Pnl_normasati_print_Paint(object sender, PaintEventArgs e)
+        {
+
         }
 
         /// <summary>
