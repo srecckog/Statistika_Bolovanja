@@ -8403,6 +8403,57 @@ namespace Statistika_Bolovanja
 
         }
 
+        private void Btnexp_norma_Click(object sender, EventArgs e)
+        {
+
+            //Creating DataTable
+            DataTable dt = new DataTable();
+
+            //Adding the Columns
+            foreach (DataGridViewColumn column in dgv_normas.Columns)
+            {
+                dt.Columns.Add(column.HeaderText, column.ValueType);
+            }
+
+            //Adding the Rows
+            foreach (DataGridViewRow row in dgv_normas.Rows)
+            {
+                dt.Rows.Add();
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (cell.Value != null && cell.Value != DBNull.Value)
+                    {
+                        dt.Rows[dt.Rows.Count - 1][cell.ColumnIndex] = cell.Value.ToString();
+                    }
+                }
+            }
+
+            //Exporting to Excel
+            string folderPath = "C:\\KKS\\";
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                wb.Worksheets.Add(dt, "Djelatnici");
+                wb.SaveAs(folderPath + "NormasatiDani.xlsx");
+            }
+            button2.Text = "Export done";
+
+
+            FileInfo fi = new FileInfo("C:\\kks\\NormasatiDani.xlsx");
+            if (fi.Exists)
+            {
+                System.Diagnostics.Process.Start(@"C:\\kks\\NormasatiDani.xlsx");
+            }
+            else
+            {
+                //file doesn't exist
+            }
+
+        }
+
         /// <summary>
         /// //////////////////////////////////////////////////////////////////////
         /// </summary>

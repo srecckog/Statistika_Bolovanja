@@ -141,6 +141,15 @@
             this.label74 = new System.Windows.Forms.Label();
             this.label72 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.pnl_normas_unos = new System.Windows.Forms.Panel();
+            this.txtbox_godina_ns = new System.Windows.Forms.TextBox();
+            this.label157 = new System.Windows.Forms.Label();
+            this.button16 = new System.Windows.Forms.Button();
+            this.txtbox_mjesec_ns = new System.Windows.Forms.TextBox();
+            this.label156 = new System.Windows.Forms.Label();
+            this.pnl_normas_tabela = new System.Windows.Forms.Panel();
+            this.btnexp_norma = new System.Windows.Forms.Button();
+            this.dgv_normas = new System.Windows.Forms.DataGridView();
             this.button15 = new System.Windows.Forms.Button();
             this.pnl_poruka = new System.Windows.Forms.Panel();
             this.lbl_poruka = new System.Windows.Forms.Label();
@@ -404,22 +413,17 @@
             this.label153 = new System.Windows.Forms.Label();
             this.cbx_listdjelat_korekcija = new System.Windows.Forms.ComboBox();
             this.pnl_normasati_print = new System.Windows.Forms.Panel();
-            this.pnl_normas_unos = new System.Windows.Forms.Panel();
-            this.button16 = new System.Windows.Forms.Button();
-            this.txtbox_godina_ns = new System.Windows.Forms.TextBox();
-            this.label157 = new System.Windows.Forms.Label();
-            this.txtbox_mjesec_ns = new System.Windows.Forms.TextBox();
-            this.label156 = new System.Windows.Forms.Label();
             this.btn_print_normasati = new System.Windows.Forms.Button();
             this.printDocument1 = new System.Drawing.Printing.PrintDocument();
             this.printDialog1 = new System.Windows.Forms.PrintDialog();
             this.printPreviewDialog1 = new System.Windows.Forms.PrintPreviewDialog();
-            this.pnl_normas_tabela = new System.Windows.Forms.Panel();
-            this.dgv_normas = new System.Windows.Forms.DataGridView();
             this.menuStrip1.SuspendLayout();
             this.pl_zbirni.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_zbirni)).BeginInit();
             this.panel1.SuspendLayout();
+            this.pnl_normas_unos.SuspendLayout();
+            this.pnl_normas_tabela.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_normas)).BeginInit();
             this.pnl_poruka.SuspendLayout();
             this.pnl_aktivnosti.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_aktivnosti)).BeginInit();
@@ -464,9 +468,6 @@
             this.pnl_pricekajte.SuspendLayout();
             this.pnl_korekcija_go.SuspendLayout();
             this.pnl_normasati_print.SuspendLayout();
-            this.pnl_normas_unos.SuspendLayout();
-            this.pnl_normas_tabela.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_normas)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -1574,6 +1575,91 @@
             this.panel1.Size = new System.Drawing.Size(1831, 698);
             this.panel1.TabIndex = 2;
             this.panel1.Visible = false;
+            // 
+            // pnl_normas_unos
+            // 
+            this.pnl_normas_unos.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pnl_normas_unos.Controls.Add(this.txtbox_godina_ns);
+            this.pnl_normas_unos.Controls.Add(this.label157);
+            this.pnl_normas_unos.Controls.Add(this.button16);
+            this.pnl_normas_unos.Controls.Add(this.txtbox_mjesec_ns);
+            this.pnl_normas_unos.Controls.Add(this.label156);
+            this.pnl_normas_unos.Location = new System.Drawing.Point(168, 5);
+            this.pnl_normas_unos.Name = "pnl_normas_unos";
+            this.pnl_normas_unos.Size = new System.Drawing.Size(420, 158);
+            this.pnl_normas_unos.TabIndex = 1;
+            this.pnl_normas_unos.Visible = false;
+            // 
+            // txtbox_godina_ns
+            // 
+            this.txtbox_godina_ns.Location = new System.Drawing.Point(75, 78);
+            this.txtbox_godina_ns.Name = "txtbox_godina_ns";
+            this.txtbox_godina_ns.Size = new System.Drawing.Size(100, 20);
+            this.txtbox_godina_ns.TabIndex = 3;
+            this.txtbox_godina_ns.TextChanged += new System.EventHandler(this.TextBox3_TextChanged);
+            // 
+            // label157
+            // 
+            this.label157.AutoSize = true;
+            this.label157.Location = new System.Drawing.Point(31, 83);
+            this.label157.Name = "label157";
+            this.label157.Size = new System.Drawing.Size(41, 13);
+            this.label157.TabIndex = 2;
+            this.label157.Text = "Godina";
+            // 
+            // button16
+            // 
+            this.button16.Location = new System.Drawing.Point(75, 114);
+            this.button16.Name = "button16";
+            this.button16.Size = new System.Drawing.Size(100, 23);
+            this.button16.TabIndex = 4;
+            this.button16.Text = "Potvrdi";
+            this.button16.UseVisualStyleBackColor = true;
+            this.button16.Click += new System.EventHandler(this.Button16_Click_1);
+            // 
+            // txtbox_mjesec_ns
+            // 
+            this.txtbox_mjesec_ns.Location = new System.Drawing.Point(75, 46);
+            this.txtbox_mjesec_ns.Name = "txtbox_mjesec_ns";
+            this.txtbox_mjesec_ns.Size = new System.Drawing.Size(100, 20);
+            this.txtbox_mjesec_ns.TabIndex = 1;
+            // 
+            // label156
+            // 
+            this.label156.AutoSize = true;
+            this.label156.Location = new System.Drawing.Point(28, 47);
+            this.label156.Name = "label156";
+            this.label156.Size = new System.Drawing.Size(41, 13);
+            this.label156.TabIndex = 0;
+            this.label156.Text = "Mjesec";
+            // 
+            // pnl_normas_tabela
+            // 
+            this.pnl_normas_tabela.Controls.Add(this.btnexp_norma);
+            this.pnl_normas_tabela.Controls.Add(this.dgv_normas);
+            this.pnl_normas_tabela.Location = new System.Drawing.Point(123, 184);
+            this.pnl_normas_tabela.Name = "pnl_normas_tabela";
+            this.pnl_normas_tabela.Size = new System.Drawing.Size(1217, 247);
+            this.pnl_normas_tabela.TabIndex = 2;
+            this.pnl_normas_tabela.Visible = false;
+            // 
+            // btnexp_norma
+            // 
+            this.btnexp_norma.Location = new System.Drawing.Point(795, 9);
+            this.btnexp_norma.Name = "btnexp_norma";
+            this.btnexp_norma.Size = new System.Drawing.Size(142, 23);
+            this.btnexp_norma.TabIndex = 1;
+            this.btnexp_norma.Text = "Export to Excel";
+            this.btnexp_norma.UseVisualStyleBackColor = true;
+            this.btnexp_norma.Click += new System.EventHandler(this.Btnexp_norma_Click);
+            // 
+            // dgv_normas
+            // 
+            this.dgv_normas.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_normas.Location = new System.Drawing.Point(4, 40);
+            this.dgv_normas.Name = "dgv_normas";
+            this.dgv_normas.Size = new System.Drawing.Size(1196, 308);
+            this.dgv_normas.TabIndex = 0;
             // 
             // button15
             // 
@@ -4243,62 +4329,6 @@
             this.pnl_normasati_print.Visible = false;
             this.pnl_normasati_print.Paint += new System.Windows.Forms.PaintEventHandler(this.Pnl_normasati_print_Paint);
             // 
-            // pnl_normas_unos
-            // 
-            this.pnl_normas_unos.Controls.Add(this.txtbox_godina_ns);
-            this.pnl_normas_unos.Controls.Add(this.label157);
-            this.pnl_normas_unos.Controls.Add(this.button16);
-            this.pnl_normas_unos.Controls.Add(this.txtbox_mjesec_ns);
-            this.pnl_normas_unos.Controls.Add(this.label156);
-            this.pnl_normas_unos.Location = new System.Drawing.Point(87, 36);
-            this.pnl_normas_unos.Name = "pnl_normas_unos";
-            this.pnl_normas_unos.Size = new System.Drawing.Size(420, 148);
-            this.pnl_normas_unos.TabIndex = 1;
-            this.pnl_normas_unos.Visible = false;
-            // 
-            // button16
-            // 
-            this.button16.Location = new System.Drawing.Point(75, 114);
-            this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(100, 23);
-            this.button16.TabIndex = 4;
-            this.button16.Text = "Potvrdi";
-            this.button16.UseVisualStyleBackColor = true;
-            this.button16.Click += new System.EventHandler(this.Button16_Click_1);
-            // 
-            // txtbox_godina_ns
-            // 
-            this.txtbox_godina_ns.Location = new System.Drawing.Point(75, 78);
-            this.txtbox_godina_ns.Name = "txtbox_godina_ns";
-            this.txtbox_godina_ns.Size = new System.Drawing.Size(100, 20);
-            this.txtbox_godina_ns.TabIndex = 3;
-            this.txtbox_godina_ns.TextChanged += new System.EventHandler(this.TextBox3_TextChanged);
-            // 
-            // label157
-            // 
-            this.label157.AutoSize = true;
-            this.label157.Location = new System.Drawing.Point(31, 83);
-            this.label157.Name = "label157";
-            this.label157.Size = new System.Drawing.Size(41, 13);
-            this.label157.TabIndex = 2;
-            this.label157.Text = "Godina";
-            // 
-            // txtbox_mjesec_ns
-            // 
-            this.txtbox_mjesec_ns.Location = new System.Drawing.Point(75, 46);
-            this.txtbox_mjesec_ns.Name = "txtbox_mjesec_ns";
-            this.txtbox_mjesec_ns.Size = new System.Drawing.Size(100, 20);
-            this.txtbox_mjesec_ns.TabIndex = 1;
-            // 
-            // label156
-            // 
-            this.label156.AutoSize = true;
-            this.label156.Location = new System.Drawing.Point(28, 47);
-            this.label156.Name = "label156";
-            this.label156.Size = new System.Drawing.Size(41, 13);
-            this.label156.TabIndex = 0;
-            this.label156.Text = "Mjesec";
-            // 
             // btn_print_normasati
             // 
             this.btn_print_normasati.Location = new System.Drawing.Point(152, 135);
@@ -4324,23 +4354,6 @@
             this.printPreviewDialog1.Visible = false;
             this.printPreviewDialog1.Load += new System.EventHandler(this.PrintPreviewDialog1_Load);
             // 
-            // pnl_normas_tabela
-            // 
-            this.pnl_normas_tabela.Controls.Add(this.dgv_normas);
-            this.pnl_normas_tabela.Location = new System.Drawing.Point(33, 188);
-            this.pnl_normas_tabela.Name = "pnl_normas_tabela";
-            this.pnl_normas_tabela.Size = new System.Drawing.Size(1217, 247);
-            this.pnl_normas_tabela.TabIndex = 2;
-            this.pnl_normas_tabela.Visible = false;
-            // 
-            // dgv_normas
-            // 
-            this.dgv_normas.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv_normas.Location = new System.Drawing.Point(0, 0);
-            this.dgv_normas.Name = "dgv_normas";
-            this.dgv_normas.Size = new System.Drawing.Size(1196, 233);
-            this.dgv_normas.TabIndex = 0;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -4348,10 +4361,6 @@
             this.ClientSize = new System.Drawing.Size(1684, 963);
             this.Controls.Add(this.pnl_normas_tabela);
             this.Controls.Add(this.pnl_normas_unos);
-            this.Controls.Add(this.pnl_normasati_print);
-            this.Controls.Add(this.pnl_korekcija_go);
-            this.Controls.Add(this.pnl_pricekajte);
-            this.Controls.Add(this.pnl_godisnjiodmor2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.pl_psr);
@@ -4367,6 +4376,10 @@
             this.Controls.Add(this.pnl_preglSkolovanja);
             this.Controls.Add(this.pnlv_log);
             this.Controls.Add(this.pnl_odredeno);
+            this.Controls.Add(this.pnl_normasati_print);
+            this.Controls.Add(this.pnl_korekcija_go);
+            this.Controls.Add(this.pnl_pricekajte);
+            this.Controls.Add(this.pnl_godisnjiodmor2);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Form1";
@@ -4379,6 +4392,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgv_zbirni)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.pnl_normas_unos.ResumeLayout(false);
+            this.pnl_normas_unos.PerformLayout();
+            this.pnl_normas_tabela.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_normas)).EndInit();
             this.pnl_poruka.ResumeLayout(false);
             this.pnl_poruka.PerformLayout();
             this.pnl_aktivnosti.ResumeLayout(false);
@@ -4448,10 +4465,6 @@
             this.pnl_korekcija_go.ResumeLayout(false);
             this.pnl_korekcija_go.PerformLayout();
             this.pnl_normasati_print.ResumeLayout(false);
-            this.pnl_normas_unos.ResumeLayout(false);
-            this.pnl_normas_unos.PerformLayout();
-            this.pnl_normas_tabela.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_normas)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -4846,6 +4859,7 @@
         private System.Windows.Forms.Label label156;
         private System.Windows.Forms.Panel pnl_normas_tabela;
         private System.Windows.Forms.DataGridView dgv_normas;
+        private System.Windows.Forms.Button btnexp_norma;
     }
 }
 
